@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Song Recommendation Studio | HK261 Intelligent Systems</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Chart.js for Validation Curves Modal -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Sleek Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" fill="#1DB954"/>
+                        <path d="M17.5 10.3c-2.8-1.7-7.4-1.8-10.1-1-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.1-.9 8.2-.8 11.4 1.1.4.2.5.7.3 1.1-.2.4-.7.5-1.1.3zm.2 2.8c-.3.4-.8.5-1.1.3-2.3-1.4-5.8-1.8-8.5-1-.4.1-.8-.1-1-.5-.1-.4.1-.8.5-1 3.1-.9 7-.5 9.7 1.1.4.2.5.7.4 1.1zm-1.3 2.8c-.2.3-.6.4-.9.2-2-1.2-4.5-1.5-7.5-.8-.3.1-.7-.1-.8-.4-.1-.3.1-.7.4-.8 3.3-.8 6.1-.4 8.4 1 .3.2.4.6.2.9z" fill="#0B0F17"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="brand-title-row">
+                        <h1>Spotify Song Recommendation Studio</h1>
+                        <span class="badge-tag green">Chapter 6 Demo</span>
+                    </div>
+                    <p class="subtitle">Interactive Unsupervised Clustering (K-Means, Hierarchical, DBSCAN) & Audio Feature Similarity Engine</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="badge-tag outline">HK261 Intelligent Systems</span>
+                <button id="openCurveBtnHeader" class="btn btn-outline-green">
+                    <span class="btn-icon">📈</span> Validation Curves
+                </button>
+            </div>
+        </header>
+
+        <!-- Curated Quick Seed Songs Ribbon (16 Iconic Tracks) -->
+        <section class="samples-ribbon">
+            <div class="ribbon-header">
+                <span class="ribbon-title">⚡ Quick Seed Songs (1-Click Recommendation Demo)</span>
+                <span class="ribbon-hint">Click any song to test audio clustering & nearest neighbor recommendations</span>
+            </div>
+            <div class="samples-scroll" id="samplesScroll">
+                {% for song in curated_samples %}
+                <div class="sample-chip {% if song.id == initial_seed.id %}active{% endif %}" data-song-id="{{ song.id }}">
+                    <div class="chip-avatar">🎵</div>
+                    <div class="chip-info">
+                        <span class="chip-title">{{ song.title }}</span>
+                        <span class="chip-artist">{{ song.artist }}</span>
+                    </div>
+                    <span class="chip-genre">{{ song.genre }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Main 2-Column Studio Grid -->
+        <main class="studio-layout">
+            <!-- Left Control Panel -->
+            <aside class="control-panel">
+                <!-- 1. Seed Song Selection Card -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="step-num">1</span>
+                        <h3>Seed Song & Audio Profile</h3>
+                        <button id="randomSongBtn" class="btn-tiny" title="Pick Random Song">🎲 Random</button>
+                    </div>
+
+                    <div class="card-body">
+                        <label class="control-label" for="songSelect">Choose Seed Track:</label>
+                        <select id="songSelect" class="form-select">
+                            {% for track in tracks %}
+                            <option value="{{ track.id }}" {% if track.id == initial_seed.id %}selected{% endif %}>
+                                {{ track.title }} - {{ track.artist }} ({{ track.genre }})
+                            </option>
+                            {% endfor %}
+                        </select>
+
+                        <!-- Seed Song Quick Details Banner -->
+                        <div class="seed-preview-banner" id="seedPreviewBanner">
+                            <div class="seed-cover">🎧</div>
+                            <div class="seed-meta">
+                                <h4 id="bannerTitle">{{ initial_seed.title }}</h4>
+                                <p id="bannerArtist">{{ initial_seed.artist }} • {{ initial_seed.year }}</p>
+                                <div class="seed-tags">
+                                    <span class="mini-tag" id="bannerGenre">{{ initial_seed.genre }}</span>
+                                    <span class="mini-tag" id="bannerTempo">{{ initial_seed.tempo }} BPM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fine-Tune Custom Audio Feature Sliders -->
+                        <details class="custom-tuning-details" id="customTuningToggle">
+                            <summary>🎛️ Fine-Tune Audio Sliders (Custom Track)</summary>
+                            <div class="slider-grid mt-2">
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Danceability:</span>
+                                        <span id="sliderDanceVal">{{ initial_seed.danceability }}</span>
+                                    </div>
+                                    <input type="range" id="sliderDance" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.danceability }}" class="form-range">
+                                </div>
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Energy:</span>
+                                        <span id="sliderEnergyVal">{{ initial_seed.energy }}</span>
+                                    </div>
+                                    <input type="range" id="sliderEnergy" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.energy }}" class="form-range">
+                                </div>
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Valence (Mood):</span>
+                                        <span id="sliderValenceVal">{{ initial_seed.valence }}</span>
+                                    </div>
+                                    <input type="range" id="sliderValence" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.valence }}" class="form-range">
+                                </div>
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Tempo (BPM):</span>
+                                        <span id="sliderTempoVal">{{ initial_seed.tempo }}</span>
+                                    </div>
+                                    <input type="range" id="sliderTempo" min="60" max="190" step="1" value="{{ initial_seed.tempo }}" class="form-range">
+                                </div>
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Acousticness:</span>
+                                        <span id="sliderAcousticVal">{{ initial_seed.acousticness }}</span>
+                                    </div>
+                                    <input type="range" id="sliderAcoustic" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.acousticness }}" class="form-range">
+                                </div>
+                            </div>
+                            <button id="applyCustomBtn" class="btn btn-primary btn-sm w-full mt-2">Apply Custom Profile</button>
+                        </details>
+                    </div>
+                </div>
+
+                <!-- 2. Clustering Algorithm Selector Card -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="step-num">2</span>
+                        <h3>Clustering Model (Chapter 6)</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <!-- Segmented Algorithm Tabs -->
+                        <div class="algo-tabs">
+                            <button class="tab-btn active" data-algo="kmeans">K-Means</button>
+                            <button class="tab-btn" data-algo="hierarchical">Hierarchical</button>
+                            <button class="tab-btn" data-algo="dbscan">DBSCAN</button>
+                        </div>
+
+                        <!-- Dynamic Algorithm Hyperparameters -->
+                        <div class="algo-params-container mt-3">
+                            <!-- K-Means Parameters -->
+                            <div class="param-group" id="kmeansControls">
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Number of Clusters ($K$):</span>
+                                        <span class="badge-value" id="kVal">4</span>
+                                    </div>
+                                    <input type="range" id="kSlider" min="2" max="8" value="4" class="form-range">
+                                </div>
+                                <div class="control-row mt-2">
+                                    <span class="control-label-sm">Centroid Initialization:</span>
+                                </div>
+                                <div class="pill-group mt-1">
+                                    <button class="pill-btn active" data-init="k-means++">k-means++</button>
+                                    <button class="pill-btn" data-init="random">random</button>
+                                </div>
+                            </div>
+
+                            <!-- Hierarchical Parameters -->
+                            <div class="param-group hidden" id="hierarchicalControls">
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Number of Clusters ($K$):</span>
+                                        <span class="badge-value" id="hierKVal">4</span>
+                                    </div>
+                                    <input type="range" id="hierKSlider" min="2" max="8" value="4" class="form-range">
+                                </div>
+                                <div class="control-row mt-2">
+                                    <span class="control-label-sm">Linkage Criterion:</span>
+                                </div>
+                                <select id="linkageSelect" class="form-select mt-1">
+                                    <option value="ward" selected>Ward (Minimizes Variance)</option>
+                                    <option value="complete">Complete Link (MAX Distance)</option>
+                                    <option value="average">Average Link (MEAN Distance)</option>
+                                    <option value="single">Single Link (MIN / Chaining Effect)</option>
+                                </select>
+                            </div>
+
+                            <!-- DBSCAN Parameters -->
+                            <div class="param-group hidden" id="dbscanControls">
+                                <div class="slider-row">
+                                    <div class="slider-header">
+                                        <span>Epsilon Radius ($\epsilon$):</span>
+                                        <span class="badge-value" id="epsVal">1.80</span>
+                                    </div>
+                                    <input type="range" id="epsSlider" min="0.8" max="3.2" step="0.1" value="1.8" class="form-range">
+                                </div>
+                                <div class="slider-row mt-2">
+                                    <div class="slider-header">
+                                        <span>MinPts (min_samples):</span>
+                                        <span class="badge-value" id="minPtsVal">3</span>
+                                    </div>
+                                    <input type="range" id="minPtsSlider" min="2" max="7" value="3" class="form-range">
+                                </div>
+                                <p class="param-hint">💡 DBSCAN identifies dense core music clusters and flags atypical tracks as noise!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Recommendation Engine Settings Card -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="step-num">3</span>
+                        <h3>Recommendation Settings</h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="control-row">
+                            <span class="control-label-sm">Distance Metric:</span>
+                        </div>
+                        <div class="pill-group mt-1">
+                            <button class="pill-btn active" data-metric="cosine">Cosine</button>
+                            <button class="pill-btn" data-metric="euclidean">Euclidean</button>
+                            <button class="pill-btn" data-metric="manhattan">Manhattan</button>
+                        </div>
+
+                        <div class="control-row mt-3">
+                            <span class="control-label-sm">Candidate Pool:</span>
+                        </div>
+                        <div class="filter-switch mt-1">
+                            <label class="switch-container">
+                                <input type="checkbox" id="filterClusterCheckbox">
+                                <span class="switch-slider"></span>
+                                <span class="switch-label">Strict Same Cluster Only</span>
+                            </label>
+                        </div>
+
+                        <div class="slider-row mt-3">
+                            <div class="slider-header">
+                                <span>Top-$N$ Recommendations:</span>
+                                <span class="badge-value" id="topNVal">5</span>
+                            </div>
+                            <input type="range" id="topNSlider" min="3" max="8" value="5" class="form-range">
+                        </div>
+
+                        <div class="mt-3">
+                            <button id="openCurveBtnSidebar" class="btn btn-secondary w-full">
+                                📈 Validation Curves (Elbow & Silhouette)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Right Main Viewport -->
+            <section class="main-viewport">
+                <!-- Cluster Validation KPI Bar -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <span class="kpi-label">Clusters Found</span>
+                        <span class="kpi-value green" id="metricClusters">{{ initial_metrics.n_clusters }}</span>
+                        <span class="kpi-sub">Partitioned Genres</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-label">Silhouette Score</span>
+                        <span class="kpi-value blue" id="metricSilhouette">{{ initial_metrics.silhouette }}</span>
+                        <span class="kpi-sub" id="metricSilBadge">Evaluating...</span>
+                    </div>
+                    <div class="kpi-card" id="cardInertia">
+                        <span class="kpi-label">Inertia (SSE)</span>
+                        <span class="kpi-value amber" id="metricInertia">{{ initial_metrics.inertia }}</span>
+                        <span class="kpi-sub">Within-Cluster Sum</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-label">Davies-Bouldin</span>
+                        <span class="kpi-value purple" id="metricDB">{{ initial_metrics.davies_bouldin }}</span>
+                        <span class="kpi-sub">Lower is Better</span>
+                    </div>
+                    <div class="kpi-card" id="cardNoise">
+                        <span class="kpi-label">Noise / Outliers</span>
+                        <span class="kpi-value slate" id="metricNoise">{{ initial_metrics.n_noise }}</span>
+                        <span class="kpi-sub">DBSCAN Outliers</span>
+                    </div>
+                </div>
+
+                <!-- Interactive 2D Audio Feature Space Canvas -->
+                <div class="canvas-card">
+                    <div class="canvas-header">
+                        <div class="canvas-title-group">
+                            <span class="canvas-icon">🌌</span>
+                            <div>
+                                <h3>2D Audio Feature Space (PCA Projection)</h3>
+                                <p class="canvas-sub">Visualizing 100 tracks in 8D audio space projected onto top 2 principal components (62% variance)</p>
+                            </div>
+                        </div>
+                        <div class="canvas-legend" id="canvasLegend">
+                            <!-- Populated dynamically with cluster colors -->
+                        </div>
+                    </div>
+
+                    <div class="canvas-wrapper">
+                        <canvas id="audioSpaceCanvas" width="820" height="480"></canvas>
+                        <div class="canvas-tooltip" id="canvasTooltip"></div>
+                        <div class="canvas-help-badge">💡 Click ANY song dot on map to set it as seed track!</div>
+                    </div>
+                </div>
+
+                <!-- Song Profile & Audio Radar Comparison Section -->
+                <div class="comparison-grid">
+                    <!-- Seed Song Audio Breakdown Card -->
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <span class="profile-tag seed">Seed Track</span>
+                            <h4 id="profileSeedTitle">{{ initial_seed.title }}</h4>
+                            <p id="profileSeedArtist">{{ initial_seed.artist }} • {{ initial_seed.year }}</p>
+                        </div>
+                        <div class="profile-bars">
+                            <div class="bar-row">
+                                <span class="bar-label">Danceability</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill green" id="barSeedDance" style="width: {{ initial_seed.danceability * 100 }}%"></div>
+                                </div>
+                                <span class="bar-val" id="valSeedDance">{{ initial_seed.danceability }}</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-label">Energy</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill blue" id="barSeedEnergy" style="width: {{ initial_seed.energy * 100 }}%"></div>
+                                </div>
+                                <span class="bar-val" id="valSeedEnergy">{{ initial_seed.energy }}</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-label">Valence (Mood)</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill amber" id="barSeedValence" style="width: {{ initial_seed.valence * 100 }}%"></div>
+                                </div>
+                                <span class="bar-val" id="valSeedValence">{{ initial_seed.valence }}</span>
+                            </div>
+                            <div class="bar-row">
+                                <span class="bar-label">Acousticness</span>
+                                <div class="bar-track">
+                                    <div class="bar-fill purple" id="barSeedAcoustic" style="width: {{ initial_seed.acousticness * 100 }}%"></div>
+                                </div>
+                                <span class="bar-val" id="valSeedAcoustic">{{ initial_seed.acousticness }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audio Feature Radar (Spider) Chart -->
+                    <div class="radar-card">
+                        <div class="radar-header">
+                            <span class="radar-title">🕸️ Audio Feature Radar Comparison</span>
+                            <div class="radar-legend">
+                                <span class="legend-dot green"></span> <span id="radarSeedLegend">Seed</span>
+                                <span class="legend-dot blue ml-2"></span> <span id="radarRecLegend">Top #1 Match</span>
+                            </div>
+                        </div>
+                        <div class="radar-wrapper">
+                            <canvas id="radarCanvas" width="340" height="230"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top-N Song Recommendations Deck -->
+                <div class="recommendations-container">
+                    <div class="section-title-row">
+                        <div class="title-with-badge">
+                            <h3>🎧 Recommended Songs for You</h3>
+                            <span class="badge-tag green" id="recCountBadge">Top 5 Matches</span>
+                        </div>
+                        <span class="rec-latency" id="recLatency">Inference: ~1.2 ms</span>
+                    </div>
+
+                    <div class="recs-grid" id="recsGrid">
+                        <!-- Populated dynamically via JS -->
+                        {% for rec in initial_recommendations %}
+                        <div class="rec-card" data-song-id="{{ rec.id }}">
+                            <div class="rec-rank">#{{ rec.rank }}</div>
+                            <div class="rec-body">
+                                <div class="rec-top">
+                                    <h4 class="rec-title">{{ rec.title }}</h4>
+                                    <span class="match-badge">{{ rec.match_percentage }}% Match</span>
+                                </div>
+                                <p class="rec-artist">{{ rec.artist }} • {{ rec.year }}</p>
+                                <div class="rec-features">
+                                    <span class="feat-pill">⚡ {{ rec.energy }} Energy</span>
+                                    <span class="feat-pill">💃 {{ rec.danceability }} Dance</span>
+                                    <span class="feat-pill">🥁 {{ rec.tempo }} BPM</span>
+                                </div>
+                                <p class="rec-reason">{{ rec.reason }}</p>
+                            </div>
+                            <button class="btn-rec-pick" data-song-id="{{ rec.id }}" title="Set as Seed Track">▶ Use as Seed</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Dynamic Algorithmic Insight Box (Chapter 6 Pedagogy) -->
+                <div class="insight-box">
+                    <div class="insight-header">
+                        <span class="insight-icon">💡</span>
+                        <h4>Algorithmic & Theoretical Insight (Chapter 6)</h4>
+                        <span class="insight-tag">Unsupervised Learning</span>
+                    </div>
+                    <p class="insight-text" id="explanationText">
+                        {{ initial_explanation }}
+                    </p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Cluster Validation Curves Modal (Elbow & Silhouette) -->
+    <div class="modal-backdrop hidden" id="curveModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-icon">📈</span>
+                    <div>
+                        <h3>Cluster Validation Curves ($K = 2 \to 8$)</h3>
+                        <p class="modal-sub">Evaluate optimal number of musical clusters using Elbow SSE and Silhouette Coefficient</p>
+                    </div>
+                </div>
+                <button class="modal-close" id="closeCurveBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-charts-grid">
+                    <div class="chart-box">
+                        <div class="chart-header">
+                            <h4>Elbow Method (Inertia SSE vs $K$)</h4>
+                            <span class="chart-badge">Within-Cluster Sum of Squares</span>
+                        </div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="elbowChart"></canvas>
+                        </div>
+                        <p class="chart-desc">Look for the "elbow" point where adding more clusters yields diminishing returns in variance reduction.</p>
+                    </div>
+                    <div class="chart-box">
+                        <div class="chart-header">
+                            <h4>Silhouette Score vs $K$</h4>
+                            <span class="chart-badge">Separation vs Cohesion</span>
+                        </div>
+                        <div class="chart-canvas-wrap">
+                            <canvas id="silhouetteChart"></canvas>
+                        </div>
+                        <p class="chart-desc">Higher score indicates compact, well-separated song clusters. The peak marks the mathematically optimal $K$.</p>
+                    </div>
+                </div>
+                <div class="modal-footer-banner" id="modalBestKBanner">
+                    <span class="banner-icon">🎯</span>
+                    <span id="modalBestKText">Calculating optimal cluster count...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass Precomputed Initial State to Frontend JS -->
+    <script>
+        window.INITIAL_DATA = {
+            points: {{ initial_points | tojson }},
+            centroids: {{ initial_centroids | tojson }},
+            metrics: {{ initial_metrics | tojson }},
+            seed_song: {{ initial_seed | tojson }},
+            recommendations: {{ initial_recommendations | tojson }},
+            radar: {{ initial_radar | tojson }},
+            cluster_colors: {{ cluster_colors | tojson }}
+        };
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
