@@ -129,8 +129,8 @@ def run_clustering(algorithm="kmeans", k=4, init="k-means++", linkage="ward", ep
                 centroids_2d.append([0.0, 0.0])
 
         explanation = (
-            f"K-Means grouped {n_samples} songs into {k} clusters by minimizing the within-cluster Sum of Squared Errors (SSE = {inertia:.1f}). "
-            f"Initialization method '{init}' ensures separated seed centers. Each song is partitioned into its closest centroid in 8D audio space."
+            f"🎯 K-Means: Gom {n_samples} bài hát vào K={k} cụm tâm trạng (Inertia SSE = {inertia:.1f}). "
+            f"Khởi tạo '{init}' giúp phân bố đều các tâm cụm theo thuộc tính âm học."
         )
 
     elif algorithm == "hierarchical":
@@ -154,16 +154,9 @@ def run_clustering(algorithm="kmeans", k=4, init="k-means++", linkage="ward", ep
 
         centroids_8d = np.array(centroids_8d)
 
-        linkage_desc = {
-            "ward": "Ward's criterion (minimizes total variance within clusters, producing compact, balanced musical genres)",
-            "complete": "Complete Link / MAX (uses greatest pairwise distance, preventing elongated chains)",
-            "average": "Average Link / MEAN (uses average pairwise distance across all songs)",
-            "single": "Single Link / MIN (infamous for the 'chaining effect', linking disparate tracks through bridge songs)"
-        }.get(linkage, linkage)
-
         explanation = (
-            f"Agglomerative Hierarchical Clustering merged songs bottom-up into a dendrogram tree with {k} clusters using {linkage_desc}. "
-            "Notice how cluster groupings reflect acoustic similarity hierarchies."
+            f"🌿 Hierarchical: Gom cụm thứ bậc dạng cây ({linkage}) thành {k} nhóm. "
+            "Liên kết phản ánh mối quan hệ họ hàng giữa các phong cách nhạc."
         )
 
     elif algorithm == "dbscan":
@@ -197,8 +190,8 @@ def run_clustering(algorithm="kmeans", k=4, init="k-means++", linkage="ward", ep
         centroids_8d = np.array(centroids_8d) if len(centroids_8d) > 0 else np.zeros((0, X.shape[1]))
 
         explanation = (
-            f"DBSCAN detected {n_clusters} dense core musical cluster(s) and flagged {n_noise} outlier song(s) as Noise "
-            f"(Eps={eps:.2f}, MinPts={min_samples}). Outliers typically correspond to distinct avant-garde, minimal ambient, or classical piano compositions!"
+            f"⁘ DBSCAN: Tìm thấy {n_clusters} cụm mật độ tự nhiên (ε={eps:.2f}, MinPts={min_samples}) "
+            f"và {n_noise} bài ngoại lai (Noise). Nhạc cổ điển tĩnh lặng/ambient tự động được xếp vào ngoại lai."
         )
 
     else:
@@ -297,8 +290,7 @@ def get_recommendations(seed_id, labels, metric="cosine", top_n=5, filter_cluste
             match_pct = max(0.0, min(100.0, round((1.0 - (d / (max_dist + 1e-5))) * 100.0, 1)))
 
         # Reason for recommendation
-        same_cluster_note = "in the same audio mood cluster" if c_id == seed_cluster and c_id != -1 else "across closely aligned acoustic dimensions"
-        reason = f"High {match_pct}% audio similarity {same_cluster_note} with complementary Tempo ({target['tempo']:.0f} BPM) & Energy ({target['energy']:.2f})."
+        reason = f"Cùng cụm #{c_id + 1} • {target['genre']} • {target['tempo']:.0f} BPM" if c_id == seed_cluster and c_id != -1 else f"Tương đồng đặc trưng • {target['tempo']:.0f} BPM"
 
         recommendations.append({
             "rank": rank,
@@ -324,7 +316,7 @@ def get_recommendations(seed_id, labels, metric="cosine", top_n=5, filter_cluste
 
     # Radar Comparison Payload (6 key normalized radar dimensions)
     # Dimensions: [Danceability, Energy, Valence, Acousticness, Instrumentalness, Speechiness]
-    radar_labels = ["Danceability", "Energy", "Valence", "Acousticness", "Instrumentalness", "Speechiness"]
+    radar_labels = ["Vũ đạo", "Năng lượng", "Tươi vui", "Mộc", "Nhạc cụ", "Lời hát"]
     seed_radar = [
         round(seed_song["danceability"], 3),
         round(seed_song["energy"], 3),

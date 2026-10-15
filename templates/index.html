@@ -1,14 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Song Recommendation Studio | HK261 Intelligent Systems</title>
+    <title>Spotify Song Recommender | HK261 Intelligent Systems</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <!-- Chart.js for Validation Curves Modal -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -17,157 +16,145 @@
         <header class="app-header">
             <div class="header-left">
                 <div class="brand-logo">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
                         <circle cx="12" cy="12" r="10" fill="#1DB954"/>
-                        <path d="M17.5 10.3c-2.8-1.7-7.4-1.8-10.1-1-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.1-.9 8.2-.8 11.4 1.1.4.2.5.7.3 1.1-.2.4-.7.5-1.1.3zm.2 2.8c-.3.4-.8.5-1.1.3-2.3-1.4-5.8-1.8-8.5-1-.4.1-.8-.1-1-.5-.1-.4.1-.8.5-1 3.1-.9 7-.5 9.7 1.1.4.2.5.7.4 1.1zm-1.3 2.8c-.2.3-.6.4-.9.2-2-1.2-4.5-1.5-7.5-.8-.3.1-.7-.1-.8-.4-.1-.3.1-.7.4-.8 3.3-.8 6.1-.4 8.4 1 .3.2.4.6.2.9z" fill="#0B0F17"/>
+                        <path d="M17.5 10.3c-2.8-1.7-7.4-1.8-10.1-1-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.1-.9 8.2-.8 11.4 1.1.4.2.5.7.3 1.1-.2.4-.7.5-1.1.3zm.2 2.8c-.3.4-.8.5-1.1.3-2.3-1.4-5.8-1.8-8.5-1-.4.1-.8-.1-1-.5-.1-.4.1-.8.5-1 3.1-.9 7-.5 9.7 1.1.4.2.5.7.4 1.1zm-1.3 2.8c-.2.3-.6.4-.9.2-2-1.2-4.5-1.5-7.5-.8-.3.1-.7-.1-.8-.4-.1-.3.1-.7.4-.8 3.3-.8 6.1-.4 8.4 1 .3.2.4.6.2.9z" fill="#070B12"/>
                     </svg>
                 </div>
                 <div>
                     <div class="brand-title-row">
-                        <h1>Spotify Song Recommendation Studio</h1>
-                        <span class="badge-tag green">Chapter 6 Demo</span>
+                        <h1>Spotify Song Recommender</h1>
+                        <span class="badge-tag green">Ch.6 Clustering Demo</span>
                     </div>
-                    <p class="subtitle">Interactive Unsupervised Clustering (K-Means, Hierarchical, DBSCAN) & Audio Feature Similarity Engine</p>
                 </div>
             </div>
             <div class="header-right">
                 <span class="badge-tag outline">HK261 Intelligent Systems</span>
-                <button id="openCurveBtnHeader" class="btn btn-outline-green">
-                    <span class="btn-icon">📈</span> Validation Curves
+                <button id="openCurveBtnHeader" class="btn btn-outline-green btn-sm">
+                    <span class="btn-icon">📈</span> Đánh giá cụm (Curves)
                 </button>
             </div>
         </header>
 
-        <!-- Curated Quick Seed Songs Ribbon (16 Iconic Tracks) -->
+        <!-- Quick Seed Songs Ribbon (16 Iconic Tracks) -->
         <section class="samples-ribbon">
-            <div class="ribbon-header">
-                <span class="ribbon-title">⚡ Quick Seed Songs (1-Click Recommendation Demo)</span>
-                <span class="ribbon-hint">Click any song to test audio clustering & nearest neighbor recommendations</span>
-            </div>
+            <div class="ribbon-label">⚡ Chọn nhanh bài mẫu:</div>
             <div class="samples-scroll" id="samplesScroll">
                 {% for song in curated_samples %}
                 <div class="sample-chip {% if song.id == initial_seed.id %}active{% endif %}" data-song-id="{{ song.id }}">
-                    <div class="chip-avatar">🎵</div>
-                    <div class="chip-info">
-                        <span class="chip-title">{{ song.title }}</span>
-                        <span class="chip-artist">{{ song.artist }}</span>
-                    </div>
-                    <span class="chip-genre">{{ song.genre }}</span>
+                    <span class="chip-icon">🎵</span>
+                    <span class="chip-title">{{ song.title }}</span>
+                    <span class="chip-sep">•</span>
+                    <span class="chip-artist">{{ song.artist }}</span>
                 </div>
                 {% endfor %}
             </div>
         </section>
 
-        <!-- Main 2-Column Studio Grid -->
+        <!-- Main 2-Column Grid -->
         <main class="studio-layout">
             <!-- Left Control Panel -->
             <aside class="control-panel">
-                <!-- 1. Seed Song Selection Card -->
+                <!-- 1. Seed Song Selection -->
                 <div class="panel-card">
                     <div class="card-header">
-                        <span class="step-num">1</span>
-                        <h3>Seed Song & Audio Profile</h3>
-                        <button id="randomSongBtn" class="btn-tiny" title="Pick Random Song">🎲 Random</button>
+                        <span class="card-title">🎵 Bài hát đang chọn</span>
+                        <button id="randomSongBtn" class="btn-tiny" title="Chọn ngẫu nhiên">🎲 Ngẫu nhiên</button>
                     </div>
 
                     <div class="card-body">
-                        <label class="control-label" for="songSelect">Choose Seed Track:</label>
                         <select id="songSelect" class="form-select">
                             {% for track in tracks %}
                             <option value="{{ track.id }}" {% if track.id == initial_seed.id %}selected{% endif %}>
-                                {{ track.title }} - {{ track.artist }} ({{ track.genre }})
+                                {{ track.title }} - {{ track.artist }}
                             </option>
                             {% endfor %}
                         </select>
 
-                        <!-- Seed Song Quick Details Banner -->
+                        <!-- Seed Song Player Box -->
                         <div class="seed-preview-banner" id="seedPreviewBanner">
-                            <div class="seed-cover">🎧</div>
+                            <div class="seed-cover">💿</div>
                             <div class="seed-meta">
                                 <h4 id="bannerTitle">{{ initial_seed.title }}</h4>
-                                <p id="bannerArtist">{{ initial_seed.artist }} • {{ initial_seed.year }}</p>
+                                <p id="bannerArtist">{{ initial_seed.artist }} ({{ initial_seed.year }})</p>
                                 <div class="seed-tags">
-                                    <span class="mini-tag" id="bannerGenre">{{ initial_seed.genre }}</span>
-                                    <span class="mini-tag" id="bannerTempo">{{ initial_seed.tempo }} BPM</span>
+                                    <span class="mini-tag" id="bannerGenre">🏷️ {{ initial_seed.genre }}</span>
+                                    <span class="mini-tag" id="bannerTempo">🥁 {{ initial_seed.tempo }} BPM</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Fine-Tune Custom Audio Feature Sliders -->
+                        <!-- Custom Tuning Sliders (Collapsed by default) -->
                         <details class="custom-tuning-details" id="customTuningToggle">
-                            <summary>🎛️ Fine-Tune Audio Sliders (Custom Track)</summary>
+                            <summary>🎛️ Tùy biến đặc trưng bài hát</summary>
                             <div class="slider-grid mt-2">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Danceability:</span>
-                                        <span id="sliderDanceVal">{{ initial_seed.danceability }}</span>
+                                        <span>💃 Vũ đạo (Danceability):</span>
+                                        <span id="sliderDanceVal" class="badge-value">{{ initial_seed.danceability }}</span>
                                     </div>
                                     <input type="range" id="sliderDance" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.danceability }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Energy:</span>
-                                        <span id="sliderEnergyVal">{{ initial_seed.energy }}</span>
+                                        <span>⚡ Năng lượng (Energy):</span>
+                                        <span id="sliderEnergyVal" class="badge-value">{{ initial_seed.energy }}</span>
                                     </div>
                                     <input type="range" id="sliderEnergy" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.energy }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Valence (Mood):</span>
-                                        <span id="sliderValenceVal">{{ initial_seed.valence }}</span>
+                                        <span>😊 Tươi vui (Valence):</span>
+                                        <span id="sliderValenceVal" class="badge-value">{{ initial_seed.valence }}</span>
                                     </div>
                                     <input type="range" id="sliderValence" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.valence }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Tempo (BPM):</span>
-                                        <span id="sliderTempoVal">{{ initial_seed.tempo }}</span>
+                                        <span>🥁 Nhịp điệu (Tempo BPM):</span>
+                                        <span id="sliderTempoVal" class="badge-value">{{ initial_seed.tempo }}</span>
                                     </div>
                                     <input type="range" id="sliderTempo" min="60" max="190" step="1" value="{{ initial_seed.tempo }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Acousticness:</span>
-                                        <span id="sliderAcousticVal">{{ initial_seed.acousticness }}</span>
+                                        <span>🎻 Mộc (Acousticness):</span>
+                                        <span id="sliderAcousticVal" class="badge-value">{{ initial_seed.acousticness }}</span>
                                     </div>
                                     <input type="range" id="sliderAcoustic" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.acousticness }}" class="form-range">
                                 </div>
                             </div>
-                            <button id="applyCustomBtn" class="btn btn-primary btn-sm w-full mt-2">Apply Custom Profile</button>
+                            <button id="applyCustomBtn" class="btn btn-primary btn-sm w-full mt-2">Áp dụng thông số</button>
                         </details>
                     </div>
                 </div>
 
-                <!-- 2. Clustering Algorithm Selector Card -->
+                <!-- 2. Clustering Model -->
                 <div class="panel-card">
                     <div class="card-header">
-                        <span class="step-num">2</span>
-                        <h3>Clustering Model (Chapter 6)</h3>
+                        <span class="card-title">⚙️ Thuật toán gom cụm</span>
                     </div>
 
                     <div class="card-body">
                         <!-- Segmented Algorithm Tabs -->
                         <div class="algo-tabs">
-                            <button class="tab-btn active" data-algo="kmeans">K-Means</button>
-                            <button class="tab-btn" data-algo="hierarchical">Hierarchical</button>
-                            <button class="tab-btn" data-algo="dbscan">DBSCAN</button>
+                            <button class="tab-btn active" data-algo="kmeans">⚬ K-Means</button>
+                            <button class="tab-btn" data-algo="hierarchical">☊ Thứ bậc</button>
+                            <button class="tab-btn" data-algo="dbscan">⁘ DBSCAN</button>
                         </div>
 
-                        <!-- Dynamic Algorithm Hyperparameters -->
-                        <div class="algo-params-container mt-3">
+                        <!-- Parameters -->
+                        <div class="algo-params-container mt-2">
                             <!-- K-Means Parameters -->
                             <div class="param-group" id="kmeansControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Number of Clusters ($K$):</span>
+                                        <span>Số cụm ($K$):</span>
                                         <span class="badge-value" id="kVal">4</span>
                                     </div>
                                     <input type="range" id="kSlider" min="2" max="8" value="4" class="form-range">
                                 </div>
-                                <div class="control-row mt-2">
-                                    <span class="control-label-sm">Centroid Initialization:</span>
-                                </div>
-                                <div class="pill-group mt-1">
+                                <div class="pill-group mt-2">
                                     <button class="pill-btn active" data-init="k-means++">k-means++</button>
                                     <button class="pill-btn" data-init="random">random</button>
                                 </div>
@@ -177,19 +164,16 @@
                             <div class="param-group hidden" id="hierarchicalControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Number of Clusters ($K$):</span>
+                                        <span>Số cụm ($K$):</span>
                                         <span class="badge-value" id="hierKVal">4</span>
                                     </div>
                                     <input type="range" id="hierKSlider" min="2" max="8" value="4" class="form-range">
                                 </div>
-                                <div class="control-row mt-2">
-                                    <span class="control-label-sm">Linkage Criterion:</span>
-                                </div>
-                                <select id="linkageSelect" class="form-select mt-1">
-                                    <option value="ward" selected>Ward (Minimizes Variance)</option>
-                                    <option value="complete">Complete Link (MAX Distance)</option>
-                                    <option value="average">Average Link (MEAN Distance)</option>
-                                    <option value="single">Single Link (MIN / Chaining Effect)</option>
+                                <select id="linkageSelect" class="form-select mt-2">
+                                    <option value="ward" selected>Ward (Tối thiểu phương sai)</option>
+                                    <option value="complete">Complete Link (Khoảng cách cực đại)</option>
+                                    <option value="average">Average Link (Khoảng cách trung bình)</option>
+                                    <option value="single">Single Link (Liên kết chuỗi / Chaining)</option>
                                 </select>
                             </div>
 
@@ -197,155 +181,150 @@
                             <div class="param-group hidden" id="dbscanControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Epsilon Radius ($\epsilon$):</span>
+                                        <span>Bán kính lân cận ($\epsilon$):</span>
                                         <span class="badge-value" id="epsVal">1.80</span>
                                     </div>
                                     <input type="range" id="epsSlider" min="0.8" max="3.2" step="0.1" value="1.8" class="form-range">
                                 </div>
                                 <div class="slider-row mt-2">
                                     <div class="slider-header">
-                                        <span>MinPts (min_samples):</span>
+                                        <span>MinPts (Số điểm tối thiểu):</span>
                                         <span class="badge-value" id="minPtsVal">3</span>
                                     </div>
                                     <input type="range" id="minPtsSlider" min="2" max="7" value="3" class="form-range">
                                 </div>
-                                <p class="param-hint">💡 DBSCAN identifies dense core music clusters and flags atypical tracks as noise!</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. Recommendation Engine Settings Card -->
+                <!-- 3. Recommendation Settings -->
                 <div class="panel-card">
                     <div class="card-header">
-                        <span class="step-num">3</span>
-                        <h3>Recommendation Settings</h3>
+                        <span class="card-title">🎯 Tùy chọn gợi ý</span>
                     </div>
 
                     <div class="card-body">
-                        <div class="control-row">
-                            <span class="control-label-sm">Distance Metric:</span>
-                        </div>
+                        <div class="control-label-sm">Độ đo tương đồng:</div>
                         <div class="pill-group mt-1">
                             <button class="pill-btn active" data-metric="cosine">Cosine</button>
                             <button class="pill-btn" data-metric="euclidean">Euclidean</button>
                             <button class="pill-btn" data-metric="manhattan">Manhattan</button>
                         </div>
 
-                        <div class="control-row mt-3">
-                            <span class="control-label-sm">Candidate Pool:</span>
-                        </div>
-                        <div class="filter-switch mt-1">
+                        <div class="filter-switch mt-2">
                             <label class="switch-container">
                                 <input type="checkbox" id="filterClusterCheckbox">
                                 <span class="switch-slider"></span>
-                                <span class="switch-label">Strict Same Cluster Only</span>
+                                <span class="switch-label">Chỉ gợi ý bài trong cùng cụm</span>
                             </label>
                         </div>
 
-                        <div class="slider-row mt-3">
+                        <div class="slider-row mt-2">
                             <div class="slider-header">
-                                <span>Top-$N$ Recommendations:</span>
+                                <span>Số bài gợi ý:</span>
                                 <span class="badge-value" id="topNVal">5</span>
                             </div>
                             <input type="range" id="topNSlider" min="3" max="8" value="5" class="form-range">
                         </div>
 
-                        <div class="mt-3">
-                            <button id="openCurveBtnSidebar" class="btn btn-secondary w-full">
-                                📈 Validation Curves (Elbow & Silhouette)
-                            </button>
-                        </div>
+                        <button id="openCurveBtnSidebar" class="btn btn-secondary btn-sm w-full mt-3">
+                            📈 Đánh giá cụm (Elbow & Silhouette)
+                        </button>
                     </div>
                 </div>
             </aside>
 
             <!-- Right Main Viewport -->
             <section class="main-viewport">
-                <!-- Cluster Validation KPI Bar -->
+                <!-- Minimal KPI Stats Bar (4 Clean Cards) -->
                 <div class="kpi-grid">
                     <div class="kpi-card">
-                        <span class="kpi-label">Clusters Found</span>
+                        <span class="kpi-label">🗂️ Số cụm ($K$)</span>
                         <span class="kpi-value green" id="metricClusters">{{ initial_metrics.n_clusters }}</span>
-                        <span class="kpi-sub">Partitioned Genres</span>
+                        <span class="kpi-sub">Cụm tâm trạng</span>
                     </div>
                     <div class="kpi-card">
-                        <span class="kpi-label">Silhouette Score</span>
+                        <span class="kpi-label">✨ Silhouette Score</span>
                         <span class="kpi-value blue" id="metricSilhouette">{{ initial_metrics.silhouette }}</span>
-                        <span class="kpi-sub" id="metricSilBadge">Evaluating...</span>
+                        <span class="kpi-sub" id="metricSilBadge">Phân tách tốt</span>
                     </div>
                     <div class="kpi-card" id="cardInertia">
-                        <span class="kpi-label">Inertia (SSE)</span>
+                        <span class="kpi-label">📉 Inertia (SSE)</span>
                         <span class="kpi-value amber" id="metricInertia">{{ initial_metrics.inertia }}</span>
-                        <span class="kpi-sub">Within-Cluster Sum</span>
-                    </div>
-                    <div class="kpi-card">
-                        <span class="kpi-label">Davies-Bouldin</span>
-                        <span class="kpi-value purple" id="metricDB">{{ initial_metrics.davies_bouldin }}</span>
-                        <span class="kpi-sub">Lower is Better</span>
+                        <span class="kpi-sub">Phương sai nội cụm</span>
                     </div>
                     <div class="kpi-card" id="cardNoise">
-                        <span class="kpi-label">Noise / Outliers</span>
+                        <span class="kpi-label">⚠️ Ngoại lai (Noise)</span>
                         <span class="kpi-value slate" id="metricNoise">{{ initial_metrics.n_noise }}</span>
-                        <span class="kpi-sub">DBSCAN Outliers</span>
+                        <span class="kpi-sub">Điểm nhiễu DBSCAN</span>
                     </div>
                 </div>
 
-                <!-- Interactive 2D Audio Feature Space Canvas -->
+                <!-- 2D Audio Feature Space Canvas -->
                 <div class="canvas-card">
                     <div class="canvas-header">
                         <div class="canvas-title-group">
                             <span class="canvas-icon">🌌</span>
-                            <div>
-                                <h3>2D Audio Feature Space (PCA Projection)</h3>
-                                <p class="canvas-sub">Visualizing 100 tracks in 8D audio space projected onto top 2 principal components (62% variance)</p>
-                            </div>
+                            <h3>Không gian âm thanh 2D (PCA)</h3>
                         </div>
-                        <div class="canvas-legend" id="canvasLegend">
-                            <!-- Populated dynamically with cluster colors -->
-                        </div>
+                        <div class="canvas-legend" id="canvasLegend"></div>
                     </div>
 
                     <div class="canvas-wrapper">
-                        <canvas id="audioSpaceCanvas" width="820" height="480"></canvas>
+                        <canvas id="audioSpaceCanvas" width="820" height="420"></canvas>
                         <div class="canvas-tooltip" id="canvasTooltip"></div>
-                        <div class="canvas-help-badge">💡 Click ANY song dot on map to set it as seed track!</div>
+                        <div class="canvas-help-badge">💡 Click vào chấm tròn bất kỳ để chọn bài hát</div>
                     </div>
                 </div>
 
-                <!-- Song Profile & Audio Radar Comparison Section -->
+                <!-- Audio Comparison: Radar & Visual Profile -->
                 <div class="comparison-grid">
-                    <!-- Seed Song Audio Breakdown Card -->
+                    <!-- Radar Chart -->
+                    <div class="radar-card">
+                        <div class="radar-header">
+                            <span class="radar-title">🕸️ Biểu đồ so sánh đặc trưng</span>
+                            <div class="radar-legend">
+                                <span class="legend-dot green"></span> <span id="radarSeedLegend">Bài gốc</span>
+                                <span class="legend-dot blue ml-2"></span> <span id="radarRecLegend">Gợi ý #1</span>
+                            </div>
+                        </div>
+                        <div class="radar-wrapper">
+                            <canvas id="radarCanvas" width="320" height="190"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Audio Feature Bars -->
                     <div class="profile-card">
                         <div class="profile-header">
-                            <span class="profile-tag seed">Seed Track</span>
+                            <span class="profile-tag seed">Bài đang chọn</span>
                             <h4 id="profileSeedTitle">{{ initial_seed.title }}</h4>
-                            <p id="profileSeedArtist">{{ initial_seed.artist }} • {{ initial_seed.year }}</p>
+                            <p id="profileSeedArtist">{{ initial_seed.artist }}</p>
                         </div>
                         <div class="profile-bars">
                             <div class="bar-row">
-                                <span class="bar-label">Danceability</span>
+                                <span class="bar-label">Vũ đạo (Dance)</span>
                                 <div class="bar-track">
                                     <div class="bar-fill green" id="barSeedDance" style="width: {{ initial_seed.danceability * 100 }}%"></div>
                                 </div>
                                 <span class="bar-val" id="valSeedDance">{{ initial_seed.danceability }}</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-label">Energy</span>
+                                <span class="bar-label">Năng lượng (Energy)</span>
                                 <div class="bar-track">
                                     <div class="bar-fill blue" id="barSeedEnergy" style="width: {{ initial_seed.energy * 100 }}%"></div>
                                 </div>
                                 <span class="bar-val" id="valSeedEnergy">{{ initial_seed.energy }}</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-label">Valence (Mood)</span>
+                                <span class="bar-label">Tươi vui (Valence)</span>
                                 <div class="bar-track">
                                     <div class="bar-fill amber" id="barSeedValence" style="width: {{ initial_seed.valence * 100 }}%"></div>
                                 </div>
                                 <span class="bar-val" id="valSeedValence">{{ initial_seed.valence }}</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-label">Acousticness</span>
+                                <span class="bar-label">Mộc (Acoustic)</span>
                                 <div class="bar-track">
                                     <div class="bar-fill purple" id="barSeedAcoustic" style="width: {{ initial_seed.acousticness * 100 }}%"></div>
                                 </div>
@@ -353,62 +332,50 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Audio Feature Radar (Spider) Chart -->
-                    <div class="radar-card">
-                        <div class="radar-header">
-                            <span class="radar-title">🕸️ Audio Feature Radar Comparison</span>
-                            <div class="radar-legend">
-                                <span class="legend-dot green"></span> <span id="radarSeedLegend">Seed</span>
-                                <span class="legend-dot blue ml-2"></span> <span id="radarRecLegend">Top #1 Match</span>
-                            </div>
-                        </div>
-                        <div class="radar-wrapper">
-                            <canvas id="radarCanvas" width="340" height="230"></canvas>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- Top-N Song Recommendations Deck -->
+                <!-- Spotify-Style Playlist Recommendations Deck -->
                 <div class="recommendations-container">
                     <div class="section-title-row">
                         <div class="title-with-badge">
-                            <h3>🎧 Recommended Songs for You</h3>
-                            <span class="badge-tag green" id="recCountBadge">Top 5 Matches</span>
+                            <h3>🎧 Danh sách bài hát gợi ý</h3>
+                            <span class="badge-tag green" id="recCountBadge">Top 5</span>
                         </div>
-                        <span class="rec-latency" id="recLatency">Inference: ~1.2 ms</span>
+                        <span class="rec-latency" id="recLatency">Độ trễ: ~1.2 ms</span>
                     </div>
 
-                    <div class="recs-grid" id="recsGrid">
-                        <!-- Populated dynamically via JS -->
+                    <!-- Clean Spotify Playlist Rows -->
+                    <div class="playlist-table" id="recsGrid">
                         {% for rec in initial_recommendations %}
-                        <div class="rec-card" data-song-id="{{ rec.id }}">
-                            <div class="rec-rank">#{{ rec.rank }}</div>
-                            <div class="rec-body">
-                                <div class="rec-top">
-                                    <h4 class="rec-title">{{ rec.title }}</h4>
-                                    <span class="match-badge">{{ rec.match_percentage }}% Match</span>
-                                </div>
-                                <p class="rec-artist">{{ rec.artist }} • {{ rec.year }}</p>
-                                <div class="rec-features">
-                                    <span class="feat-pill">⚡ {{ rec.energy }} Energy</span>
-                                    <span class="feat-pill">💃 {{ rec.danceability }} Dance</span>
-                                    <span class="feat-pill">🥁 {{ rec.tempo }} BPM</span>
-                                </div>
-                                <p class="rec-reason">{{ rec.reason }}</p>
+                        <div class="playlist-row" data-song-id="{{ rec.id }}">
+                            <div class="row-rank">#{{ rec.rank }}</div>
+                            <div class="row-info">
+                                <span class="row-title">{{ rec.title }}</span>
+                                <span class="row-artist">{{ rec.artist }}</span>
                             </div>
-                            <button class="btn-rec-pick" data-song-id="{{ rec.id }}" title="Set as Seed Track">▶ Use as Seed</button>
+                            <div class="row-tags">
+                                <span class="tag-pill">{{ rec.genre }}</span>
+                                <span class="tag-pill">🥁 {{ rec.tempo }} BPM</span>
+                            </div>
+                            <div class="row-match">
+                                <div class="match-bar-track">
+                                    <div class="match-bar-fill" style="width: {{ rec.match_percentage }}%"></div>
+                                </div>
+                                <span class="match-text">{{ rec.match_percentage }}%</span>
+                            </div>
+                            <button class="btn-play-seed" data-song-id="{{ rec.id }}" title="Chọn bài này làm Seed">
+                                ▶ Chọn
+                            </button>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <!-- Dynamic Algorithmic Insight Box (Chapter 6 Pedagogy) -->
+                <!-- Pedagogical Insight Box (Brief & Iconic) -->
                 <div class="insight-box">
                     <div class="insight-header">
                         <span class="insight-icon">💡</span>
-                        <h4>Algorithmic & Theoretical Insight (Chapter 6)</h4>
-                        <span class="insight-tag">Unsupervised Learning</span>
+                        <h4>Cơ chế thuật toán & Đánh giá</h4>
                     </div>
                     <p class="insight-text" id="explanationText">
                         {{ initial_explanation }}
@@ -418,15 +385,15 @@
         </main>
     </div>
 
-    <!-- Cluster Validation Curves Modal (Elbow & Silhouette) -->
+    <!-- Cluster Validation Curves Modal -->
     <div class="modal-backdrop hidden" id="curveModal">
         <div class="modal-card">
             <div class="modal-header">
                 <div class="modal-title-group">
                     <span class="modal-icon">📈</span>
                     <div>
-                        <h3>Cluster Validation Curves ($K = 2 \to 8$)</h3>
-                        <p class="modal-sub">Evaluate optimal number of musical clusters using Elbow SSE and Silhouette Coefficient</p>
+                        <h3>Đường cong kiểm định cụm ($K = 2 \to 8$)</h3>
+                        <p class="modal-sub">Đánh giá số cụm tối ưu theo phương pháp Khuỷu tay (Elbow) và Hệ số Silhouette</p>
                     </div>
                 </div>
                 <button class="modal-close" id="closeCurveBtn">&times;</button>
@@ -435,28 +402,26 @@
                 <div class="modal-charts-grid">
                     <div class="chart-box">
                         <div class="chart-header">
-                            <h4>Elbow Method (Inertia SSE vs $K$)</h4>
-                            <span class="chart-badge">Within-Cluster Sum of Squares</span>
+                            <h4>Phương pháp Khuỷu tay (Elbow SSE)</h4>
+                            <span class="chart-badge">Giảm phương sai</span>
                         </div>
                         <div class="chart-canvas-wrap">
                             <canvas id="elbowChart"></canvas>
                         </div>
-                        <p class="chart-desc">Look for the "elbow" point where adding more clusters yields diminishing returns in variance reduction.</p>
                     </div>
                     <div class="chart-box">
                         <div class="chart-header">
-                            <h4>Silhouette Score vs $K$</h4>
-                            <span class="chart-badge">Separation vs Cohesion</span>
+                            <h4>Hệ số Silhouette vs $K$</h4>
+                            <span class="chart-badge">Độ gắn kết & phân tách</span>
                         </div>
                         <div class="chart-canvas-wrap">
                             <canvas id="silhouetteChart"></canvas>
                         </div>
-                        <p class="chart-desc">Higher score indicates compact, well-separated song clusters. The peak marks the mathematically optimal $K$.</p>
                     </div>
                 </div>
                 <div class="modal-footer-banner" id="modalBestKBanner">
                     <span class="banner-icon">🎯</span>
-                    <span id="modalBestKText">Calculating optimal cluster count...</span>
+                    <span id="modalBestKText">Đang tính toán số cụm $K$ tối ưu...</span>
                 </div>
             </div>
         </div>

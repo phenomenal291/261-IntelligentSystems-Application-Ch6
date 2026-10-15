@@ -525,22 +525,22 @@
     function updateSilhouetteStatus(score) {
         if (!elements.metricSilBadge) return;
         if (score === "N/A" || score === null || score === undefined) {
-            elements.metricSilBadge.textContent = "Insufficient clusters";
+            elements.metricSilBadge.textContent = "Chưa đủ cụm";
             elements.metricSilBadge.style.color = "#64748B";
             return;
         }
         const s = parseFloat(score);
-        if (s >= 0.40) {
-            elements.metricSilBadge.textContent = "Dense & Well-Separated";
+        if (s >= 0.35) {
+            elements.metricSilBadge.textContent = "✨ Phân tách rất tốt";
             elements.metricSilBadge.style.color = "#1DB954";
-        } else if (s >= 0.25) {
-            elements.metricSilBadge.textContent = "Reasonable Musical Partition";
+        } else if (s >= 0.20) {
+            elements.metricSilBadge.textContent = "✨ Cụm hợp lý";
             elements.metricSilBadge.style.color = "#38BDF8";
-        } else if (s >= 0.10) {
-            elements.metricSilBadge.textContent = "Moderate Overlapping";
+        } else if (s >= 0.05) {
+            elements.metricSilBadge.textContent = "⚡ Có giao thoa nhẹ";
             elements.metricSilBadge.style.color = "#F59E0B";
         } else {
-            elements.metricSilBadge.textContent = "Weak / Diffuse Structure";
+            elements.metricSilBadge.textContent = "⚠️ Cụm phân tán";
             elements.metricSilBadge.style.color = "#F43F5E";
         }
     }
@@ -552,7 +552,6 @@
             elements.metricClusters.textContent = data.metrics.n_clusters;
             elements.metricSilhouette.textContent = data.metrics.silhouette;
             elements.metricInertia.textContent = data.metrics.inertia;
-            elements.metricDB.textContent = data.metrics.davies_bouldin;
             elements.metricNoise.textContent = data.metrics.n_noise;
             updateSilhouetteStatus(data.metrics.silhouette);
         }
@@ -566,13 +565,13 @@
         // Update Seed Track Banner
         if (state.seedSong) {
             elements.bannerTitle.textContent = state.seedSong.title;
-            elements.bannerArtist.textContent = `${state.seedSong.artist} • ${state.seedSong.year}`;
-            elements.bannerGenre.textContent = state.seedSong.genre;
-            elements.bannerTempo.textContent = `${state.seedSong.tempo} BPM`;
+            elements.bannerArtist.textContent = `${state.seedSong.artist} (${state.seedSong.year})`;
+            elements.bannerGenre.textContent = `🏷️ ${state.seedSong.genre}`;
+            elements.bannerTempo.textContent = `🥁 ${state.seedSong.tempo} BPM`;
 
             // Profile Card
             elements.profileSeedTitle.textContent = state.seedSong.title;
-            elements.profileSeedArtist.textContent = `${state.seedSong.artist} • ${state.seedSong.year}`;
+            elements.profileSeedArtist.textContent = state.seedSong.artist;
             elements.barSeedDance.style.width = `${state.seedSong.danceability * 100}%`;
             elements.valSeedDance.textContent = state.seedSong.danceability;
             elements.barSeedEnergy.style.width = `${state.seedSong.energy * 100}%`;
@@ -597,36 +596,38 @@
             });
         }
 
-        // Update Recommendations Deck
+        // Update Recommendations Deck (Playlist rows)
         if (state.recommendations) {
-            elements.recCountBadge.textContent = `Top ${state.recommendations.length} Matches`;
+            elements.recCountBadge.textContent = `Top ${state.recommendations.length}`;
             let recsHtml = "";
             state.recommendations.forEach(rec => {
                 recsHtml += `
-                    <div class="rec-card" data-song-id="${rec.id}">
-                        <div class="rec-rank">#${rec.rank}</div>
-                        <div class="rec-body">
-                            <div class="rec-top">
-                                <h4 class="rec-title">${rec.title}</h4>
-                                <span class="match-badge">${rec.match_percentage}% Match</span>
-                            </div>
-                            <p class="rec-artist">${rec.artist} • ${rec.year}</p>
-                            <div class="rec-features">
-                                <span class="feat-pill">⚡ ${rec.energy} Energy</span>
-                                <span class="feat-pill">💃 ${rec.danceability} Dance</span>
-                                <span class="feat-pill">🥁 ${rec.tempo} BPM</span>
-                                <span class="feat-pill" style="color: ${state.clusterColors[rec.cluster % state.clusterColors.length] || '#38BDF8'}">Cluster #${rec.cluster + 1}</span>
-                            </div>
-                            <p class="rec-reason">${rec.reason}</p>
+                    <div class="playlist-row" data-song-id="${rec.id}">
+                        <div class="row-rank">#${rec.rank}</div>
+                        <div class="row-info">
+                            <span class="row-title">${rec.title}</span>
+                            <span class="row-artist">${rec.artist}</span>
                         </div>
-                        <button class="btn-rec-pick" data-song-id="${rec.id}" title="Set as Seed Track">▶ Use as Seed</button>
+                        <div class="row-tags">
+                            <span class="tag-pill">${rec.genre}</span>
+                            <span class="tag-pill">🥁 ${rec.tempo} BPM</span>
+                        </div>
+                        <div class="row-match">
+                            <div class="match-bar-track">
+                                <div class="match-bar-fill" style="width: ${rec.match_percentage}%"></div>
+                            </div>
+                            <span class="match-text">${rec.match_percentage}%</span>
+                        </div>
+                        <button class="btn-play-seed" data-song-id="${rec.id}" title="Chọn bài này làm Seed">
+                            ▶ Chọn
+                        </button>
                     </div>
                 `;
             });
             elements.recsGrid.innerHTML = recsHtml;
 
-            // Attach listeners to new "Use as Seed" buttons
-            document.querySelectorAll(".btn-rec-pick").forEach(btn => {
+            // Attach listeners to "Chọn" buttons
+            document.querySelectorAll(".btn-play-seed").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     e.stopPropagation();
                     const songId = btn.getAttribute("data-song-id");
@@ -643,7 +644,7 @@
 
         // Update Latency & Insight
         if (data.metrics && data.metrics.inference_time_ms !== undefined) {
-            elements.recLatency.textContent = `Inference: ~${data.metrics.inference_time_ms} ms`;
+            elements.recLatency.textContent = `Độ trễ: ~${data.metrics.inference_time_ms} ms`;
         }
         if (data.explanation) {
             elements.explanationText.textContent = data.explanation;
@@ -910,7 +911,7 @@
             return;
         }
 
-        elements.modalBestKText.textContent = "Computing K-Means clustering for K = 2 to 8 across all tracks...";
+        elements.modalBestKText.textContent = "Đang chạy gom cụm K-Means với K từ 2 đến 8...";
 
         fetch("/api/validation-curve", {
             method: "POST",
@@ -929,8 +930,8 @@
 
     function renderValidationCharts(data) {
         elements.modalBestKText.innerHTML = `
-            Optimal recommendation cluster count is <strong>K = ${data.best_k}</strong>
-            (Maximizes Silhouette Separation: <strong>${Math.max(...data.silhouette_curve)}</strong>).
+            Số cụm tối ưu được đề xuất là <strong>K = ${data.best_k}</strong> 
+            (Hệ số Silhouette đạt đỉnh: <strong>${Math.max(...data.silhouette_curve)}</strong>).
         `;
 
         // 1. Elbow Chart (Chart.js)
@@ -1005,3 +1006,4 @@
         init();
     }
 })();
+
