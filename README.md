@@ -100,6 +100,7 @@ Evaluated across the 100 benchmark tracks with $K$-Means clustering ($K = 2 \dot
 │   └── index.html             # Studio user interface layout
 ├── prepare_data.py            # Data preprocessing, standardization, and PCA pipeline
 ├── app.py                     # High-performance Flask server with REST API
+├── test_app.py                # Automated test suite (9 test cases, 100% pass)
 ├── requirements.txt           # Python library dependencies
 ├── vercel.json                # Vercel serverless rewrite rules
 └── README.md                  # Comprehensive academic & practical documentation
@@ -109,9 +110,10 @@ Evaluated across the 100 benchmark tracks with $K$-Means clustering ($K = 2 \dot
 
 ## 🚀 Quickstart & Reproduction Guide
 
-### 1. Clone or Open the Repository
+### 1. Clone the Repository
 ```bash
-cd HK261_Intelligent_Sysytem_Ch6/261-IntelligentSystems-Application-Ch6
+git clone https://github.com/phenomenal291/261-IntelligentSystems-Application-Ch6.git
+cd 261-IntelligentSystems-Application-Ch6
 ```
 
 ### 2. Set Up Virtual Environment & Dependencies
