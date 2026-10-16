@@ -710,14 +710,16 @@
             selectSeedSong(options[randomIndex].value);
         });
 
-        // 3. Curated Quick Sample Chips Ribbon
-        elements.samplesScroll.addEventListener("click", (e) => {
-            const chip = e.target.closest(".sample-chip");
-            if (chip) {
-                const songId = chip.getAttribute("data-song-id");
-                selectSeedSong(songId);
-            }
-        });
+        // 3. Curated Quick Sample Chips Ribbon (optional - may be hidden)
+        if (elements.samplesScroll) {
+            elements.samplesScroll.addEventListener("click", (e) => {
+                const chip = e.target.closest(".sample-chip");
+                if (chip) {
+                    const songId = chip.getAttribute("data-song-id");
+                    selectSeedSong(songId);
+                }
+            });
+        }
 
         // 4. Algorithm Tabs
         elements.algoTabs.forEach(tab => {

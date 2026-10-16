@@ -1247,35 +1247,17 @@ body {
                         <path d="M17.5 10.3c-2.8-1.7-7.4-1.8-10.1-1-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.1-.9 8.2-.8 11.4 1.1.4.2.5.7.3 1.1-.2.4-.7.5-1.1.3zm.2 2.8c-.3.4-.8.5-1.1.3-2.3-1.4-5.8-1.8-8.5-1-.4.1-.8-.1-1-.5-.1-.4.1-.8.5-1 3.1-.9 7-.5 9.7 1.1.4.2.5.7.4 1.1zm-1.3 2.8c-.2.3-.6.4-.9.2-2-1.2-4.5-1.5-7.5-.8-.3.1-.7-.1-.8-.4-.1-.3.1-.7.4-.8 3.3-.8 6.1-.4 8.4 1 .3.2.4.6.2.9z" fill="#070B12"/>
                     </svg>
                 </div>
-                <div>
-                    <div class="brand-title-row">
-                        <h1>Spotify Song Recommender</h1>
-                        <span class="badge-tag green">Ch.6 Clustering Demo</span>
-                    </div>
+                <div class="brand-title-row">
+                    <span class="badge-tag green">Ch.6 Clustering Demo</span>
+                    <span class="badge-tag outline">HK261 Intelligent Systems</span>
                 </div>
             </div>
             <div class="header-right">
-                <span class="badge-tag outline">HK261 Intelligent Systems</span>
                 <button id="openCurveBtnHeader" class="btn btn-outline-green btn-sm">
-                    <span class="btn-icon">📈</span> Đánh giá cụm (Curves)
+                    <span class="btn-icon">📈</span> Validation Curves
                 </button>
             </div>
         </header>
-
-        <!-- Quick Seed Songs Ribbon (16 Iconic Tracks) -->
-        <section class="samples-ribbon">
-            <div class="ribbon-label">⚡ Chọn nhanh bài mẫu:</div>
-            <div class="samples-scroll" id="samplesScroll">
-                {% for song in curated_samples %}
-                <div class="sample-chip {% if song.id == initial_seed.id %}active{% endif %}" data-song-id="{{ song.id }}">
-                    <span class="chip-icon">🎵</span>
-                    <span class="chip-title">{{ song.title }}</span>
-                    <span class="chip-sep">•</span>
-                    <span class="chip-artist">{{ song.artist }}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
 
         <!-- Main 2-Column Grid -->
         <main class="studio-layout">
@@ -1375,7 +1357,7 @@ body {
                             <div class="param-group" id="kmeansControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Số cụm ($K$):</span>
+                                        <span>K clusters</span>
                                         <span class="badge-value" id="kVal">4</span>
                                     </div>
                                     <input type="range" id="kSlider" min="2" max="8" value="4" class="form-range">
@@ -1390,16 +1372,16 @@ body {
                             <div class="param-group hidden" id="hierarchicalControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Số cụm ($K$):</span>
+                                        <span>K clusters</span>
                                         <span class="badge-value" id="hierKVal">4</span>
                                     </div>
                                     <input type="range" id="hierKSlider" min="2" max="8" value="4" class="form-range">
                                 </div>
                                 <select id="linkageSelect" class="form-select mt-2">
-                                    <option value="ward" selected>Ward (Tối thiểu phương sai)</option>
-                                    <option value="complete">Complete Link (Khoảng cách cực đại)</option>
-                                    <option value="average">Average Link (Khoảng cách trung bình)</option>
-                                    <option value="single">Single Link (Liên kết chuỗi / Chaining)</option>
+                                    <option value="ward" selected>Ward</option>
+                                    <option value="complete">Complete Link</option>
+                                    <option value="average">Average Link</option>
+                                    <option value="single">Single Link</option>
                                 </select>
                             </div>
 
@@ -1407,14 +1389,14 @@ body {
                             <div class="param-group hidden" id="dbscanControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>Bán kính lân cận ($\epsilon$):</span>
+                                        <span>ε radius</span>
                                         <span class="badge-value" id="epsVal">1.80</span>
                                     </div>
                                     <input type="range" id="epsSlider" min="0.8" max="3.2" step="0.1" value="1.8" class="form-range">
                                 </div>
                                 <div class="slider-row mt-2">
                                     <div class="slider-header">
-                                        <span>MinPts (Số điểm tối thiểu):</span>
+                                        <span>MinPts</span>
                                         <span class="badge-value" id="minPtsVal">3</span>
                                     </div>
                                     <input type="range" id="minPtsSlider" min="2" max="7" value="3" class="form-range">
@@ -1466,24 +1448,21 @@ body {
                 <!-- Minimal KPI Stats Bar (4 Clean Cards) -->
                 <div class="kpi-grid">
                     <div class="kpi-card">
-                        <span class="kpi-label">🗂️ Số cụm ($K$)</span>
+                        <span class="kpi-label">🗂️ Clusters (K)</span>
                         <span class="kpi-value green" id="metricClusters">{{ initial_metrics.n_clusters }}</span>
-                        <span class="kpi-sub">Cụm tâm trạng</span>
                     </div>
                     <div class="kpi-card">
-                        <span class="kpi-label">✨ Silhouette Score</span>
+                        <span class="kpi-label">✨ Silhouette</span>
                         <span class="kpi-value blue" id="metricSilhouette">{{ initial_metrics.silhouette }}</span>
-                        <span class="kpi-sub" id="metricSilBadge">Phân tách tốt</span>
+                        <span class="kpi-sub hidden" id="metricSilBadge"></span>
                     </div>
                     <div class="kpi-card" id="cardInertia">
                         <span class="kpi-label">📉 Inertia (SSE)</span>
                         <span class="kpi-value amber" id="metricInertia">{{ initial_metrics.inertia }}</span>
-                        <span class="kpi-sub">Phương sai nội cụm</span>
                     </div>
                     <div class="kpi-card" id="cardNoise">
-                        <span class="kpi-label">⚠️ Ngoại lai (Noise)</span>
+                        <span class="kpi-label">⚠️ Noise Points</span>
                         <span class="kpi-value slate" id="metricNoise">{{ initial_metrics.n_noise }}</span>
-                        <span class="kpi-sub">Điểm nhiễu DBSCAN</span>
                     </div>
                 </div>
 
@@ -2378,14 +2357,16 @@ body {
             selectSeedSong(options[randomIndex].value);
         });
 
-        // 3. Curated Quick Sample Chips Ribbon
-        elements.samplesScroll.addEventListener("click", (e) => {
-            const chip = e.target.closest(".sample-chip");
-            if (chip) {
-                const songId = chip.getAttribute("data-song-id");
-                selectSeedSong(songId);
-            }
-        });
+        // 3. Curated Quick Sample Chips Ribbon (optional - may be hidden)
+        if (elements.samplesScroll) {
+            elements.samplesScroll.addEventListener("click", (e) => {
+                const chip = e.target.closest(".sample-chip");
+                if (chip) {
+                    const songId = chip.getAttribute("data-song-id");
+                    selectSeedSong(songId);
+                }
+            });
+        }
 
         // 4. Algorithm Tabs
         elements.algoTabs.forEach(tab => {
