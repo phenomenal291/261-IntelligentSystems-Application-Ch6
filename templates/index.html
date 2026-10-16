@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
 /* ==========================================================================
-   Spotify Song Recommender - Minimal Dark Theme
-   HK261 Intelligent Systems - Chapter 6 Application
+   Spotify Song Recommender - Clean Minimalist Dark Design System
+   HK261 Intelligent Systems - Chapter 6 Interactive Application
    ========================================================================== */
 
 :root {
-    --bg-main: #070B12;
+    --bg-main: #080C14;
     --bg-card: #0F1726;
-    --bg-card-alt: #141E33;
-    --bg-elevated: #1B2844;
-    --border-color: #1E2D4A;
+    --bg-card-alt: #131E33;
+    --bg-elevated: #1A2844;
+    --border: #1E2D4A;
     --border-hover: #2E436B;
 
     --text-primary: #F8FAFC;
@@ -27,11 +27,12 @@
 
     --spotify-green: #1DB954;
     --spotify-green-hover: #1ED760;
-    --spotify-green-glow: rgba(29, 185, 84, 0.25);
+    --spotify-green-glow: rgba(29, 185, 84, 0.2);
 
     --accent-blue: #38BDF8;
     --accent-purple: #A855F7;
     --accent-amber: #F59E0B;
+    --accent-rose: #F43F5E;
     --accent-slate: #64748B;
 
     --radius-sm: 6px;
@@ -61,12 +62,12 @@ body {
 }
 
 .app-container {
-    max-width: 1320px;
+    max-width: 1280px;
     margin: 0 auto;
 }
 
 /* ==========================================================================
-   Header Styling
+   Top Header (Minimalist)
    ========================================================================== */
 
 .app-header {
@@ -75,7 +76,7 @@ body {
     align-items: center;
     padding: 10px 18px;
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     margin-bottom: 12px;
     box-shadow: var(--shadow-card);
@@ -122,7 +123,7 @@ body {
 .badge-tag.outline {
     background: rgba(255, 255, 255, 0.03);
     color: var(--text-secondary);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
 }
 
 /* Buttons */
@@ -131,8 +132,8 @@ body {
     align-items: center;
     justify-content: center;
     gap: 5px;
-    padding: 7px 12px;
-    font-size: 0.78rem;
+    padding: 6px 12px;
+    font-size: 0.76rem;
     font-weight: 600;
     border-radius: var(--radius-md);
     border: none;
@@ -164,22 +165,22 @@ body {
 
 .btn-secondary {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     color: var(--text-primary);
 }
 
 .btn-secondary:hover {
-    background: var(--border-color);
+    background: var(--border);
 }
 
 .btn-sm {
     padding: 5px 10px;
-    font-size: 0.74rem;
+    font-size: 0.72rem;
 }
 
 .btn-tiny {
     background: var(--bg-elevated);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     color: var(--text-secondary);
     padding: 2px 8px;
     font-size: 0.7rem;
@@ -194,7 +195,7 @@ body {
 }
 
 /* ==========================================================================
-   Quick Seed Songs Ribbon (Compact)
+   Quick Samples Ribbon (Pill Scroll)
    ========================================================================== */
 
 .samples-ribbon {
@@ -202,18 +203,19 @@ body {
     align-items: center;
     gap: 12px;
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 8px 14px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .ribbon-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     color: var(--spotify-green);
     white-space: nowrap;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .samples-scroll {
@@ -232,7 +234,7 @@ body {
     align-items: center;
     gap: 5px;
     background: var(--bg-card-alt);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-full);
     padding: 4px 10px;
     font-size: 0.74rem;
@@ -270,12 +272,12 @@ body {
 
 .studio-layout {
     display: grid;
-    grid-template-columns: 330px 1fr;
+    grid-template-columns: 320px 1fr;
     gap: 14px;
     align-items: start;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 960px) {
     .studio-layout {
         grid-template-columns: 1fr;
     }
@@ -293,7 +295,7 @@ body {
 
 .panel-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     overflow: hidden;
@@ -304,12 +306,12 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 14px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.015);
 }
 
 .card-title {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 700;
 }
 
@@ -321,13 +323,14 @@ body {
     width: 100%;
     background: var(--bg-card-alt);
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 7px 10px;
     font-size: 0.78rem;
     font-family: inherit;
     outline: none;
     cursor: pointer;
+    transition: border-color 0.2s;
 }
 
 .form-select:focus {
@@ -340,7 +343,7 @@ body {
     align-items: center;
     gap: 10px;
     background: var(--bg-card-alt);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 8px 10px;
     margin-top: 8px;
@@ -393,7 +396,7 @@ body {
 /* Custom Tuning (Collapsed) */
 .custom-tuning-details {
     margin-top: 10px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--border);
     padding-top: 8px;
 }
 
@@ -460,7 +463,7 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     background: var(--bg-card-alt);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 2px;
     gap: 2px;
@@ -492,7 +495,7 @@ body {
 .pill-btn {
     flex: 1;
     background: var(--bg-card-alt);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     color: var(--text-secondary);
     font-size: 0.72rem;
     font-weight: 600;
@@ -547,7 +550,7 @@ body {
     border-radius: 20px;
     position: relative;
     transition: 0.2s;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
 }
 
 .switch-slider::before {
@@ -569,6 +572,35 @@ body {
 .switch-container input:checked + .switch-slider::before {
     transform: translateX(12px);
     background-color: #000;
+}
+
+.switch-label {
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+}
+
+.algo-params-container {
+    margin-top: 8px;
+}
+
+.param-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.brand-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-icon, .chip-icon, .modal-icon, .canvas-icon, .banner-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 /* ==========================================================================
@@ -596,16 +628,612 @@ body {
 
 .kpi-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 8px 12px;
     display: flex;
     flex-direction: column;
+    box-shadow: var(--shadow-card);
 }
 
 .kpi-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
 
-</style>
+.kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 1px 0;
+}
+
+.kpi-value.green { color: var(--spotify-green); }
+.kpi-value.blue { color: var(--accent-blue); }
+.kpi-value.amber { color: var(--accent-amber); }
+.kpi-value.slate { color: var(--text-secondary); }
+
+.kpi-sub {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   2D Audio Map Canvas Card
+   ========================================================================== */
+
+.canvas-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.canvas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.canvas-title-group {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.canvas-title-group h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.canvas-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-dot.green { background-color: var(--spotify-green); }
+.legend-dot.blue { background-color: var(--accent-blue); }
+
+.canvas-wrapper {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: #05080F;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#audioSpaceCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+}
+
+.canvas-help-badge {
+    position: absolute;
+    bottom: 8px;
+    left: 10px;
+    background: rgba(7, 11, 18, 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px 8px;
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.canvas-tooltip {
+    position: absolute;
+    display: none;
+    background: rgba(15, 23, 38, 0.95);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    z-index: 100;
+    max-width: 220px;
+}
+
+.tooltip-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.tooltip-artist {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+}
+
+.tooltip-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.tooltip-badge {
+    background: var(--bg-elevated);
+    font-size: 0.62rem;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   Comparison: Radar & Profile
+   ========================================================================== */
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 760px) {
+    .comparison-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.profile-card, .radar-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    box-shadow: var(--shadow-card);
+}
+
+.profile-header {
+    margin-bottom: 8px;
+}
+
+.profile-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.profile-tag.seed {
+    background: rgba(29, 185, 84, 0.15);
+    color: var(--spotify-green);
+}
+
+.profile-header h4 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.profile-header p {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.profile-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 35px;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+}
+
+.bar-label {
+    color: var(--text-secondary);
+}
+
+.bar-track {
+    background: var(--bg-elevated);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.bar-fill.green { background: var(--spotify-green); }
+.bar-fill.blue { background: var(--accent-blue); }
+.bar-fill.amber { background: var(--accent-amber); }
+.bar-fill.purple { background: var(--accent-purple); }
+
+.bar-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.radar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.radar-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.radar-legend {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+}
+
+.radar-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 190px;
+}
+
+/* ==========================================================================
+   Playlist-Style Recommendations Table (Clean & Spotify-like)
+   ========================================================================== */
+
+.recommendations-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
+    box-shadow: var(--shadow-card);
+}
+
+.section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.title-with-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.title-with-badge h3 {
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.rec-latency {
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+}
+
+.playlist-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.playlist-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto 110px 65px;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.playlist-row:hover {
+    background: var(--bg-elevated);
+    border-color: var(--spotify-green);
+    transform: translateX(2px);
+}
+
+.row-rank {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--spotify-green);
+}
+
+.row-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.row-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.row-artist {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.row-tags {
+    display: flex;
+    gap: 5px;
+}
+
+.tag-pill {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+
+.row-match {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.match-bar-track {
+    flex: 1;
+    background: var(--bg-elevated);
+    height: 5px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.match-bar-fill {
+    height: 100%;
+    background: var(--spotify-green);
+    border-radius: 3px;
+}
+
+.match-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--spotify-green);
+    min-width: 42px;
+    text-align: right;
+}
+
+.btn-play-seed {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.playlist-row:hover .btn-play-seed {
+    border-color: var(--spotify-green);
+    color: var(--spotify-green);
+}
+
+.btn-play-seed:hover {
+    background: var(--spotify-green) !important;
+    color: #000 !important;
+}
+
+/* ==========================================================================
+   Pedagogical Insight Callout (Clean)
+   ========================================================================== */
+
+.insight-box {
+    background: rgba(56, 189, 248, 0.03);
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.insight-icon {
+    font-size: 1rem;
+}
+
+.insight-header h4 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+}
+
+.insight-text {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
+}
+
+/* ==========================================================================
+   Validation Curves Modal
+   ========================================================================== */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.modal-backdrop.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.modal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    max-width: 780px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modal-header h3 {
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.modal-sub {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.4rem;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 14px 18px;
+}
+
+.modal-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 650px) {
+    .modal-charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.chart-box {
+    background: var(--bg-card-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.chart-header h4 {
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.chart-badge {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+}
+
+.chart-canvas-wrap {
+    height: 180px;
+    position: relative;
+}
+
+.modal-footer-banner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(29, 185, 84, 0.1);
+    border: 1px solid rgba(29, 185, 84, 0.25);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-top: 12px;
+    font-size: 0.74rem;
+    color: var(--spotify-green);
+    font-weight: 600;
+}
+
+/* Utilities */
+.hidden { display: none !important; }
+.w-full { width: 100%; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.ml-2 { margin-left: 8px; }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -1201,11 +1829,12 @@ body {
     // High-DPI Canvas Setup
     function setupCanvasHighDPI() {
         const canvas = elements.audioSpaceCanvas;
+        if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
 
         canvas.width = rect.width * dpr;
-        canvas.height = 480 * dpr;
+        canvas.height = (rect.height || 420) * dpr;
 
         const ctx = canvas.getContext("2d");
         ctx.scale(dpr, dpr);
@@ -1870,7 +2499,7 @@ body {
             const mouseY = e.clientY - rect.top;
 
             const width = rect.width;
-            const height = 480;
+            const height = rect.height;
 
             let closestPoint = null;
             let minDist = 14; // hover hit radius
@@ -1935,6 +2564,12 @@ body {
         elements.closeCurveBtn.addEventListener("click", closeModal);
         elements.curveModal.addEventListener("click", (e) => {
             if (e.target === elements.curveModal) closeModal();
+        });
+
+        // Window resize responsive redraw
+        window.addEventListener("resize", () => {
+            setupCanvasHighDPI();
+            renderCanvas();
         });
     }
 
@@ -2046,8 +2681,6 @@ body {
         init();
     }
 })();
-
-
-</script>
+    </script>
 </body>
 </html>

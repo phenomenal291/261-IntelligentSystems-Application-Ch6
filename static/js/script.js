@@ -161,11 +161,12 @@
     // High-DPI Canvas Setup
     function setupCanvasHighDPI() {
         const canvas = elements.audioSpaceCanvas;
+        if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
 
         canvas.width = rect.width * dpr;
-        canvas.height = 480 * dpr;
+        canvas.height = (rect.height || 420) * dpr;
 
         const ctx = canvas.getContext("2d");
         ctx.scale(dpr, dpr);
@@ -830,7 +831,7 @@
             const mouseY = e.clientY - rect.top;
 
             const width = rect.width;
-            const height = 480;
+            const height = rect.height;
 
             let closestPoint = null;
             let minDist = 14; // hover hit radius
@@ -895,6 +896,12 @@
         elements.closeCurveBtn.addEventListener("click", closeModal);
         elements.curveModal.addEventListener("click", (e) => {
             if (e.target === elements.curveModal) closeModal();
+        });
+
+        // Window resize responsive redraw
+        window.addEventListener("resize", () => {
+            setupCanvasHighDPI();
+            renderCanvas();
         });
     }
 
