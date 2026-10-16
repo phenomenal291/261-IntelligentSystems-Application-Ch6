@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Song Recommender | HK261 Intelligent Systems</title>
+    <title>Spotify Song Recommendation Studio | HK261 Intelligent Systems</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
 /* ==========================================================================
    Spotify Song Recommender - Clean Minimalist Dark Design System
@@ -14,12 +14,12 @@
    ========================================================================== */
 
 :root {
-    --bg-main: #080C14;
-    --bg-card: #0F1726;
-    --bg-card-alt: #131E33;
-    --bg-elevated: #1A2844;
-    --border: #1E2D4A;
-    --border-hover: #2E436B;
+    --bg-main: #070B12;
+    --bg-card: #0D1424;
+    --bg-card-alt: #111A2E;
+    --bg-elevated: #17233D;
+    --border: #1B2945;
+    --border-hover: #293E66;
 
     --text-primary: #F8FAFC;
     --text-secondary: #94A3B8;
@@ -40,7 +40,7 @@
     --radius-lg: 14px;
     --radius-full: 9999px;
 
-    --shadow-card: 0 4px 14px 0 rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 4px 14px 0 rgba(0, 0, 0, 0.45);
     --shadow-glow: 0 0 16px rgba(29, 185, 84, 0.25);
 }
 
@@ -57,88 +57,32 @@ body {
     font-size: 13.5px;
     line-height: 1.45;
     min-height: 100vh;
-    padding: 12px 16px;
+    padding: 16px;
     overflow-x: hidden;
 }
 
 .app-container {
-    max-width: 1280px;
+    max-width: 1320px;
     margin: 0 auto;
 }
 
 /* ==========================================================================
-   Top Header (Minimalist)
+   Buttons & Micro-interactions
    ========================================================================== */
 
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 18px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 12px;
-    box-shadow: var(--shadow-card);
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.brand-title-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.app-header h1 {
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    color: var(--text-primary);
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.badge-tag {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: var(--radius-full);
-}
-
-.badge-tag.green {
-    background: rgba(29, 185, 84, 0.12);
-    color: var(--spotify-green);
-    border: 1px solid rgba(29, 185, 84, 0.3);
-}
-
-.badge-tag.outline {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-}
-
-/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 6px 12px;
-    font-size: 0.76rem;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
     font-weight: 600;
     border-radius: var(--radius-md);
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .btn-outline-green {
@@ -173,6 +117,26 @@ body {
     background: var(--border);
 }
 
+.btn-validation {
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    border-radius: var(--radius-md);
+    background: rgba(29, 185, 84, 0.08);
+    border: 1px solid rgba(29, 185, 84, 0.35);
+    color: var(--spotify-green);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-validation:hover {
+    background: var(--spotify-green);
+    color: #000;
+    border-color: var(--spotify-green);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+}
+
 .btn-sm {
     padding: 5px 10px;
     font-size: 0.72rem;
@@ -182,88 +146,17 @@ body {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     color: var(--text-secondary);
-    padding: 2px 8px;
-    font-size: 0.7rem;
+    padding: 3px 9px;
+    font-size: 0.72rem;
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .btn-tiny:hover {
     color: var(--spotify-green);
     border-color: var(--spotify-green);
-}
-
-/* ==========================================================================
-   Quick Samples Ribbon (Pill Scroll)
-   ========================================================================== */
-
-.samples-ribbon {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 8px 14px;
-    margin-bottom: 12px;
-}
-
-.ribbon-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--spotify-green);
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.samples-scroll {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.samples-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-.sample-chip {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--bg-card-alt);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-full);
-    padding: 4px 10px;
-    font-size: 0.74rem;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s ease;
-}
-
-.sample-chip:hover {
-    border-color: var(--spotify-green);
-    background: var(--bg-elevated);
-}
-
-.sample-chip.active {
-    background: rgba(29, 185, 84, 0.15);
-    border-color: var(--spotify-green);
-    color: var(--spotify-green);
-}
-
-.chip-title {
-    font-weight: 700;
-}
-
-.chip-sep {
-    color: var(--text-muted);
-}
-
-.chip-artist {
-    color: var(--text-secondary);
 }
 
 /* ==========================================================================
@@ -273,18 +166,18 @@ body {
 .studio-layout {
     display: grid;
     grid-template-columns: 320px 1fr;
-    gap: 14px;
+    gap: 16px;
     align-items: start;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 992px) {
     .studio-layout {
         grid-template-columns: 1fr;
     }
 }
 
 /* ==========================================================================
-   Left Control Panel
+   Left Control Panel (3-Step Guided Flow)
    ========================================================================== */
 
 .control-panel {
@@ -307,12 +200,31 @@ body {
     align-items: center;
     padding: 10px 14px;
     border-bottom: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.015);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent-blue);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .card-title {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
+    color: var(--text-primary);
 }
 
 .card-body {
@@ -325,7 +237,7 @@ body {
     color: var(--text-primary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 7px 10px;
+    padding: 8px 10px;
     font-size: 0.78rem;
     font-family: inherit;
     outline: none;
@@ -357,7 +269,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
+    flex-shrink: 0;
 }
 
 .seed-meta {
@@ -389,7 +302,7 @@ body {
     color: var(--spotify-green);
     font-size: 0.65rem;
     font-weight: 600;
-    padding: 1px 5px;
+    padding: 1px 6px;
     border-radius: 3px;
 }
 
@@ -405,6 +318,7 @@ body {
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
+    user-select: none;
 }
 
 .custom-tuning-details summary:hover {
@@ -450,12 +364,12 @@ body {
 .form-range::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: var(--spotify-green);
     cursor: pointer;
-    box-shadow: 0 0 5px rgba(29, 185, 84, 0.6);
+    box-shadow: 0 0 6px rgba(29, 185, 84, 0.6);
 }
 
 /* Segmented Algo Tabs */
@@ -475,15 +389,17 @@ body {
     color: var(--text-secondary);
     font-size: 0.74rem;
     font-weight: 600;
-    padding: 5px 2px;
+    padding: 6px 2px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .tab-btn.active {
     background: var(--spotify-green);
     color: #000;
+    font-weight: 700;
 }
 
 /* Pill Group */
@@ -504,6 +420,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    font-family: inherit;
 }
 
 .pill-btn:hover {
@@ -515,6 +432,7 @@ body {
     background: rgba(56, 189, 248, 0.15);
     border-color: var(--accent-blue);
     color: var(--accent-blue);
+    font-weight: 700;
 }
 
 .control-label-sm {
@@ -589,20 +507,6 @@ body {
     gap: 8px;
 }
 
-.brand-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.btn-icon, .chip-icon, .modal-icon, .canvas-icon, .banner-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
 /* ==========================================================================
    Right Main Viewport
    ========================================================================== */
@@ -613,7 +517,7 @@ body {
     gap: 12px;
 }
 
-/* KPI Bar (4 Cards) */
+/* Minimal KPI Stats (4 Cards) */
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -630,7 +534,7 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 8px 12px;
+    padding: 9px 13px;
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-card);
@@ -638,15 +542,17 @@ body {
 
 .kpi-label {
     font-size: 0.68rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .kpi-value {
     font-family: 'JetBrains Mono', monospace;
     font-size: 1.25rem;
     font-weight: 800;
-    margin: 1px 0;
+    margin: 2px 0 1px 0;
 }
 
 .kpi-value.green { color: var(--spotify-green); }
@@ -656,7 +562,7 @@ body {
 
 .kpi-sub {
     font-size: 0.65rem;
-    color: var(--text-muted);
+    font-weight: 600;
 }
 
 /* ==========================================================================
@@ -712,21 +618,18 @@ body {
     display: inline-block;
 }
 
-.legend-dot.green { background-color: var(--spotify-green); }
-.legend-dot.blue { background-color: var(--accent-blue); }
-
 .canvas-wrapper {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 420px;
     background: #05080F;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 #audioSpaceCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: block;
@@ -750,7 +653,7 @@ body {
 .canvas-tooltip {
     position: absolute;
     display: none;
-    background: rgba(15, 23, 38, 0.95);
+    background: rgba(13, 20, 36, 0.95);
     backdrop-filter: blur(6px);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
@@ -847,7 +750,7 @@ body {
 
 .bar-row {
     display: grid;
-    grid-template-columns: 90px 1fr 35px;
+    grid-template-columns: 95px 1fr 35px;
     align-items: center;
     gap: 8px;
     font-size: 0.7rem;
@@ -899,6 +802,13 @@ body {
     color: var(--text-secondary);
 }
 
+.radar-legend .legend-dot {
+    margin-right: 2px;
+}
+
+.radar-legend .legend-dot.green { background-color: var(--spotify-green); }
+.radar-legend .legend-dot.blue { background-color: var(--accent-blue); }
+
 .radar-wrapper {
     display: flex;
     justify-content: center;
@@ -907,7 +817,7 @@ body {
 }
 
 /* ==========================================================================
-   Playlist-Style Recommendations Table (Clean & Spotify-like)
+   Playlist-Style Recommendations Table
    ========================================================================== */
 
 .recommendations-container {
@@ -934,6 +844,19 @@ body {
 .title-with-badge h3 {
     font-size: 0.88rem;
     font-weight: 700;
+}
+
+.badge-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+}
+
+.badge-tag.green {
+    background: rgba(29, 185, 84, 0.12);
+    color: var(--spotify-green);
+    border: 1px solid rgba(29, 185, 84, 0.3);
 }
 
 .rec-latency {
@@ -1049,6 +972,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    font-family: inherit;
 }
 
 .playlist-row:hover .btn-play-seed {
@@ -1062,7 +986,7 @@ body {
 }
 
 /* ==========================================================================
-   Pedagogical Insight Callout (Clean)
+   Pedagogical Insight Callout
    ========================================================================== */
 
 .insight-box {
@@ -1077,10 +1001,6 @@ body {
     align-items: center;
     gap: 6px;
     margin-bottom: 4px;
-}
-
-.insight-icon {
-    font-size: 1rem;
 }
 
 .insight-header h4 {
@@ -1105,7 +1025,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.78);
     backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
@@ -1238,36 +1158,18 @@ body {
 </head>
 <body>
     <div class="app-container">
-        <!-- Top Sleek Header -->
-        <header class="app-header">
-            <div class="header-left">
-                <div class="brand-logo">
-                    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
-                        <circle cx="12" cy="12" r="10" fill="#1DB954"/>
-                        <path d="M17.5 10.3c-2.8-1.7-7.4-1.8-10.1-1-.4.1-.9-.1-1-.5-.1-.4.1-.9.5-1 3.1-.9 8.2-.8 11.4 1.1.4.2.5.7.3 1.1-.2.4-.7.5-1.1.3zm.2 2.8c-.3.4-.8.5-1.1.3-2.3-1.4-5.8-1.8-8.5-1-.4.1-.8-.1-1-.5-.1-.4.1-.8.5-1 3.1-.9 7-.5 9.7 1.1.4.2.5.7.4 1.1zm-1.3 2.8c-.2.3-.6.4-.9.2-2-1.2-4.5-1.5-7.5-.8-.3.1-.7-.1-.8-.4-.1-.3.1-.7.4-.8 3.3-.8 6.1-.4 8.4 1 .3.2.4.6.2.9z" fill="#070B12"/>
-                    </svg>
-                </div>
-                <div class="brand-title-row">
-                    <span class="badge-tag green">Ch.6 Clustering Demo</span>
-                    <span class="badge-tag outline">HK261 Intelligent Systems</span>
-                </div>
-            </div>
-            <div class="header-right">
-                <button id="openCurveBtnHeader" class="btn btn-outline-green btn-sm">
-                    <span class="btn-icon">📈</span> Validation Curves
-                </button>
-            </div>
-        </header>
-
-        <!-- Main 2-Column Grid -->
+        <!-- Main 2-Column Studio Grid -->
         <main class="studio-layout">
-            <!-- Left Control Panel -->
+            <!-- Left Control Panel (Guided 3-Step Flow) -->
             <aside class="control-panel">
-                <!-- 1. Seed Song Selection -->
+                <!-- STEP 1: Seed Song Selection -->
                 <div class="panel-card">
                     <div class="card-header">
-                        <span class="card-title">🎵 Bài hát đang chọn</span>
-                        <button id="randomSongBtn" class="btn-tiny" title="Chọn ngẫu nhiên">🎲 Ngẫu nhiên</button>
+                        <div class="card-title-group">
+                            <span class="step-badge">Step 1</span>
+                            <span class="card-title">Seed Track</span>
+                        </div>
+                        <button id="randomSongBtn" class="btn-tiny" title="Pick a random song">🎲 Random</button>
                     </div>
 
                     <div class="card-body">
@@ -1279,7 +1181,7 @@ body {
                             {% endfor %}
                         </select>
 
-                        <!-- Seed Song Player Box -->
+                        <!-- Seed Song Preview Banner -->
                         <div class="seed-preview-banner" id="seedPreviewBanner">
                             <div class="seed-cover">💿</div>
                             <div class="seed-meta">
@@ -1294,61 +1196,64 @@ body {
 
                         <!-- Custom Tuning Sliders (Collapsed by default) -->
                         <details class="custom-tuning-details" id="customTuningToggle">
-                            <summary>🎛️ Tùy biến đặc trưng bài hát</summary>
+                            <summary>🎛️ Tune Audio Features</summary>
                             <div class="slider-grid mt-2">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>💃 Vũ đạo (Danceability):</span>
+                                        <span>Danceability:</span>
                                         <span id="sliderDanceVal" class="badge-value">{{ initial_seed.danceability }}</span>
                                     </div>
                                     <input type="range" id="sliderDance" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.danceability }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>⚡ Năng lượng (Energy):</span>
+                                        <span>Energy:</span>
                                         <span id="sliderEnergyVal" class="badge-value">{{ initial_seed.energy }}</span>
                                     </div>
                                     <input type="range" id="sliderEnergy" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.energy }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>😊 Tươi vui (Valence):</span>
+                                        <span>Valence (Positivity):</span>
                                         <span id="sliderValenceVal" class="badge-value">{{ initial_seed.valence }}</span>
                                     </div>
                                     <input type="range" id="sliderValence" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.valence }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>🥁 Nhịp điệu (Tempo BPM):</span>
+                                        <span>Tempo (BPM):</span>
                                         <span id="sliderTempoVal" class="badge-value">{{ initial_seed.tempo }}</span>
                                     </div>
                                     <input type="range" id="sliderTempo" min="60" max="190" step="1" value="{{ initial_seed.tempo }}" class="form-range">
                                 </div>
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>🎻 Mộc (Acousticness):</span>
+                                        <span>Acousticness:</span>
                                         <span id="sliderAcousticVal" class="badge-value">{{ initial_seed.acousticness }}</span>
                                     </div>
                                     <input type="range" id="sliderAcoustic" min="0.0" max="1.0" step="0.01" value="{{ initial_seed.acousticness }}" class="form-range">
                                 </div>
                             </div>
-                            <button id="applyCustomBtn" class="btn btn-primary btn-sm w-full mt-2">Áp dụng thông số</button>
+                            <button id="applyCustomBtn" class="btn btn-primary btn-sm w-full mt-2">Apply Audio Features</button>
                         </details>
                     </div>
                 </div>
 
-                <!-- 2. Clustering Model -->
+                <!-- STEP 2: Clustering Model -->
                 <div class="panel-card">
                     <div class="card-header">
-                        <span class="card-title">⚙️ Thuật toán gom cụm</span>
+                        <div class="card-title-group">
+                            <span class="step-badge">Step 2</span>
+                            <span class="card-title">Clustering Algorithm</span>
+                        </div>
                     </div>
 
                     <div class="card-body">
                         <!-- Segmented Algorithm Tabs -->
                         <div class="algo-tabs">
-                            <button class="tab-btn active" data-algo="kmeans">⚬ K-Means</button>
-                            <button class="tab-btn" data-algo="hierarchical">☊ Thứ bậc</button>
-                            <button class="tab-btn" data-algo="dbscan">⁘ DBSCAN</button>
+                            <button class="tab-btn active" data-algo="kmeans">K-Means</button>
+                            <button class="tab-btn" data-algo="hierarchical">Hierarchical</button>
+                            <button class="tab-btn" data-algo="dbscan">DBSCAN</button>
                         </div>
 
                         <!-- Parameters -->
@@ -1357,7 +1262,7 @@ body {
                             <div class="param-group" id="kmeansControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>K clusters</span>
+                                        <span>Clusters (K)</span>
                                         <span class="badge-value" id="kVal">4</span>
                                     </div>
                                     <input type="range" id="kSlider" min="2" max="8" value="4" class="form-range">
@@ -1372,16 +1277,16 @@ body {
                             <div class="param-group hidden" id="hierarchicalControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>K clusters</span>
+                                        <span>Clusters (K)</span>
                                         <span class="badge-value" id="hierKVal">4</span>
                                     </div>
                                     <input type="range" id="hierKSlider" min="2" max="8" value="4" class="form-range">
                                 </div>
                                 <select id="linkageSelect" class="form-select mt-2">
-                                    <option value="ward" selected>Ward</option>
-                                    <option value="complete">Complete Link</option>
-                                    <option value="average">Average Link</option>
-                                    <option value="single">Single Link</option>
+                                    <option value="ward" selected>Ward Linkage</option>
+                                    <option value="complete">Complete Linkage</option>
+                                    <option value="average">Average Linkage</option>
+                                    <option value="single">Single Linkage</option>
                                 </select>
                             </div>
 
@@ -1389,14 +1294,14 @@ body {
                             <div class="param-group hidden" id="dbscanControls">
                                 <div class="slider-row">
                                     <div class="slider-header">
-                                        <span>ε radius</span>
+                                        <span>Epsilon (ε)</span>
                                         <span class="badge-value" id="epsVal">1.80</span>
                                     </div>
                                     <input type="range" id="epsSlider" min="0.8" max="3.2" step="0.1" value="1.8" class="form-range">
                                 </div>
                                 <div class="slider-row mt-2">
                                     <div class="slider-header">
-                                        <span>MinPts</span>
+                                        <span>Min Samples (MinPts)</span>
                                         <span class="badge-value" id="minPtsVal">3</span>
                                     </div>
                                     <input type="range" id="minPtsSlider" min="2" max="7" value="3" class="form-range">
@@ -1406,14 +1311,17 @@ body {
                     </div>
                 </div>
 
-                <!-- 3. Recommendation Settings -->
+                <!-- STEP 3: Recommendation Settings -->
                 <div class="panel-card">
                     <div class="card-header">
-                        <span class="card-title">🎯 Tùy chọn gợi ý</span>
+                        <div class="card-title-group">
+                            <span class="step-badge">Step 3</span>
+                            <span class="card-title">Recommendation</span>
+                        </div>
                     </div>
 
                     <div class="card-body">
-                        <div class="control-label-sm">Độ đo tương đồng:</div>
+                        <div class="control-label-sm">Distance Metric:</div>
                         <div class="pill-group mt-1">
                             <button class="pill-btn active" data-metric="cosine">Cosine</button>
                             <button class="pill-btn" data-metric="euclidean">Euclidean</button>
@@ -1424,112 +1332,113 @@ body {
                             <label class="switch-container">
                                 <input type="checkbox" id="filterClusterCheckbox">
                                 <span class="switch-slider"></span>
-                                <span class="switch-label">Chỉ gợi ý bài trong cùng cụm</span>
+                                <span class="switch-label">Only recommend within same cluster</span>
                             </label>
                         </div>
 
                         <div class="slider-row mt-2">
                             <div class="slider-header">
-                                <span>Số bài gợi ý:</span>
+                                <span>Recommendation Count:</span>
                                 <span class="badge-value" id="topNVal">5</span>
                             </div>
                             <input type="range" id="topNSlider" min="3" max="8" value="5" class="form-range">
                         </div>
-
-                        <button id="openCurveBtnSidebar" class="btn btn-secondary btn-sm w-full mt-3">
-                            📈 Đánh giá cụm (Elbow & Silhouette)
-                        </button>
                     </div>
                 </div>
+
+                <!-- Action Button: Validation Curves -->
+                <button id="openCurveBtn" class="btn btn-validation w-full">
+                    <span>📈</span> Validation Curves (Elbow & Silhouette)
+                </button>
             </aside>
 
             <!-- Right Main Viewport -->
             <section class="main-viewport">
-                <!-- Minimal KPI Stats Bar (4 Clean Cards) -->
+                <!-- 4 KPI Metrics Cards -->
                 <div class="kpi-grid">
                     <div class="kpi-card">
-                        <span class="kpi-label">🗂️ Clusters (K)</span>
+                        <span class="kpi-label">Clusters (K)</span>
                         <span class="kpi-value green" id="metricClusters">{{ initial_metrics.n_clusters }}</span>
                     </div>
                     <div class="kpi-card">
-                        <span class="kpi-label">✨ Silhouette</span>
+                        <span class="kpi-label">Silhouette Score</span>
                         <span class="kpi-value blue" id="metricSilhouette">{{ initial_metrics.silhouette }}</span>
-                        <span class="kpi-sub hidden" id="metricSilBadge"></span>
+                        <span class="kpi-sub" id="metricSilBadge"></span>
                     </div>
                     <div class="kpi-card" id="cardInertia">
-                        <span class="kpi-label">📉 Inertia (SSE)</span>
+                        <span class="kpi-label">Inertia (SSE)</span>
                         <span class="kpi-value amber" id="metricInertia">{{ initial_metrics.inertia }}</span>
                     </div>
                     <div class="kpi-card" id="cardNoise">
-                        <span class="kpi-label">⚠️ Noise Points</span>
+                        <span class="kpi-label">Noise Outliers</span>
                         <span class="kpi-value slate" id="metricNoise">{{ initial_metrics.n_noise }}</span>
                     </div>
                 </div>
 
-                <!-- 2D Audio Feature Space Canvas -->
+                <!-- 2D Audio Feature Space Canvas (PCA) -->
                 <div class="canvas-card">
                     <div class="canvas-header">
                         <div class="canvas-title-group">
                             <span class="canvas-icon">🌌</span>
-                            <h3>Không gian âm thanh 2D (PCA)</h3>
+                            <h3>2D Audio Feature Space (PCA)</h3>
                         </div>
                         <div class="canvas-legend" id="canvasLegend"></div>
                     </div>
 
                     <div class="canvas-wrapper">
-                        <canvas id="audioSpaceCanvas" width="820" height="420"></canvas>
+                        <canvas id="audioSpaceCanvas"></canvas>
                         <div class="canvas-tooltip" id="canvasTooltip"></div>
-                        <div class="canvas-help-badge">💡 Click vào chấm tròn bất kỳ để chọn bài hát</div>
+                        <div class="canvas-help-badge">💡 Click any point to select song</div>
                     </div>
                 </div>
 
                 <!-- Audio Comparison: Radar & Visual Profile -->
                 <div class="comparison-grid">
-                    <!-- Radar Chart -->
+                    <!-- Radar Spider Chart -->
                     <div class="radar-card">
                         <div class="radar-header">
-                            <span class="radar-title">🕸️ Biểu đồ so sánh đặc trưng</span>
+                            <span class="radar-title">🕸️ Feature Radar Comparison</span>
                             <div class="radar-legend">
-                                <span class="legend-dot green"></span> <span id="radarSeedLegend">Bài gốc</span>
-                                <span class="legend-dot blue ml-2"></span> <span id="radarRecLegend">Gợi ý #1</span>
+                                <span class="legend-dot green"></span> <span id="radarSeedLegend">Seed Track</span>
+                                <span class="legend-dot blue ml-2"></span> <span id="radarRecLegend">Top Match</span>
                             </div>
                         </div>
                         <div class="radar-wrapper">
-                            <canvas id="radarCanvas" width="320" height="190"></canvas>
+                            <canvas id="radarCanvas" width="340" height="210"></canvas>
                         </div>
                     </div>
 
                     <!-- Audio Feature Bars -->
                     <div class="profile-card">
                         <div class="profile-header">
-                            <span class="profile-tag seed">Bài đang chọn</span>
+                            <span class="profile-tag seed">Selected Track</span>
                             <h4 id="profileSeedTitle">{{ initial_seed.title }}</h4>
                             <p id="profileSeedArtist">{{ initial_seed.artist }}</p>
                         </div>
                         <div class="profile-bars">
                             <div class="bar-row">
-                                <span class="bar-label">Vũ đạo (Dance)</span>
+                                <span class="bar-label">Danceability</span>
                                 <div class="bar-track">
                                     <div class="bar-fill green" id="barSeedDance" style="width: {{ initial_seed.danceability * 100 }}%"></div>
                                 </div>
                                 <span class="bar-val" id="valSeedDance">{{ initial_seed.danceability }}</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-label">Năng lượng (Energy)</span>
+                                <span class="bar-label">Energy</span>
                                 <div class="bar-track">
                                     <div class="bar-fill blue" id="barSeedEnergy" style="width: {{ initial_seed.energy * 100 }}%"></div>
                                 </div>
                                 <span class="bar-val" id="valSeedEnergy">{{ initial_seed.energy }}</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-label">Tươi vui (Valence)</span>
+                                <span class="bar-label">Valence</span>
                                 <div class="bar-track">
                                     <div class="bar-fill amber" id="barSeedValence" style="width: {{ initial_seed.valence * 100 }}%"></div>
                                 </div>
                                 <span class="bar-val" id="valSeedValence">{{ initial_seed.valence }}</span>
                             </div>
                             <div class="bar-row">
-                                <span class="bar-label">Mộc (Acoustic)</span>
+                                <span class="bar-label">Acousticness</span>
                                 <div class="bar-track">
                                     <div class="bar-fill purple" id="barSeedAcoustic" style="width: {{ initial_seed.acousticness * 100 }}%"></div>
                                 </div>
@@ -1543,13 +1452,12 @@ body {
                 <div class="recommendations-container">
                     <div class="section-title-row">
                         <div class="title-with-badge">
-                            <h3>🎧 Danh sách bài hát gợi ý</h3>
+                            <h3>🎧 Recommended Tracks</h3>
                             <span class="badge-tag green" id="recCountBadge">Top 5</span>
                         </div>
-                        <span class="rec-latency" id="recLatency">Độ trễ: ~1.2 ms</span>
+                        <span class="rec-latency" id="recLatency">Latency: ~1.2 ms</span>
                     </div>
 
-                    <!-- Clean Spotify Playlist Rows -->
                     <div class="playlist-table" id="recsGrid">
                         {% for rec in initial_recommendations %}
                         <div class="playlist-row" data-song-id="{{ rec.id }}">
@@ -1568,19 +1476,19 @@ body {
                                 </div>
                                 <span class="match-text">{{ rec.match_percentage }}%</span>
                             </div>
-                            <button class="btn-play-seed" data-song-id="{{ rec.id }}" title="Chọn bài này làm Seed">
-                                ▶ Chọn
+                            <button class="btn-play-seed" data-song-id="{{ rec.id }}" title="Select as Seed Track">
+                                ▶ Select
                             </button>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <!-- Pedagogical Insight Box (Brief & Iconic) -->
-                <div class="insight-box">
+                <!-- Pedagogical Explanation Insight Box -->
+                <div class="insight-box" id="insightBox">
                     <div class="insight-header">
                         <span class="insight-icon">💡</span>
-                        <h4>Cơ chế thuật toán & Đánh giá</h4>
+                        <h4>Clustering & Recommendation Insights</h4>
                     </div>
                     <p class="insight-text" id="explanationText">
                         {{ initial_explanation }}
@@ -1590,15 +1498,15 @@ body {
         </main>
     </div>
 
-    <!-- Cluster Validation Curves Modal -->
+    <!-- Cluster Validation Modal (Elbow SSE & Silhouette) -->
     <div class="modal-backdrop hidden" id="curveModal">
         <div class="modal-card">
             <div class="modal-header">
                 <div class="modal-title-group">
                     <span class="modal-icon">📈</span>
                     <div>
-                        <h3>Đường cong kiểm định cụm ($K = 2 \to 8$)</h3>
-                        <p class="modal-sub">Đánh giá số cụm tối ưu theo phương pháp Khuỷu tay (Elbow) và Hệ số Silhouette</p>
+                        <h3>Cluster Validation Curves</h3>
+                        <p class="modal-sub">Elbow SSE (Within-Cluster Sum of Squares) and Silhouette Analysis (K = 2 to 8)</p>
                     </div>
                 </div>
                 <button class="modal-close" id="closeCurveBtn">&times;</button>
@@ -1607,8 +1515,8 @@ body {
                 <div class="modal-charts-grid">
                     <div class="chart-box">
                         <div class="chart-header">
-                            <h4>Phương pháp Khuỷu tay (Elbow SSE)</h4>
-                            <span class="chart-badge">Giảm phương sai</span>
+                            <h4>Elbow Method (SSE)</h4>
+                            <span class="chart-badge">Lower = Tighter Clusters</span>
                         </div>
                         <div class="chart-canvas-wrap">
                             <canvas id="elbowChart"></canvas>
@@ -1616,8 +1524,8 @@ body {
                     </div>
                     <div class="chart-box">
                         <div class="chart-header">
-                            <h4>Hệ số Silhouette vs $K$</h4>
-                            <span class="chart-badge">Độ gắn kết & phân tách</span>
+                            <h4>Silhouette Score vs K</h4>
+                            <span class="chart-badge">Peak = Optimal Separation</span>
                         </div>
                         <div class="chart-canvas-wrap">
                             <canvas id="silhouetteChart"></canvas>
@@ -1626,7 +1534,7 @@ body {
                 </div>
                 <div class="modal-footer-banner" id="modalBestKBanner">
                     <span class="banner-icon">🎯</span>
-                    <span id="modalBestKText">Đang tính toán số cụm $K$ tối ưu...</span>
+                    <span id="modalBestKText">Evaluating optimal cluster count K...</span>
                 </div>
             </div>
         </div>
@@ -1648,7 +1556,8 @@ body {
 /**
  * Spotify Song Recommendation Studio - Client Controller
  * HK261 Intelligent Systems - Chapter 6 Application
- * Features: 2D Audio Feature Space Canvas, Radar Spider Visualizer, Interactive Clustering & Nearest Neighbor
+ * Algorithms: K-Means, Agglomerative Hierarchical, DBSCAN
+ * Visualizations: 2D Audio Feature Space (PCA), Radar Chart, Cluster Validation Curves
  */
 
 (function () {
@@ -1673,7 +1582,10 @@ body {
         seedSong: null,
         recommendations: [],
         radar: null,
-        clusterColors: [],
+        clusterColors: [
+            "#1DB954", "#38BDF8", "#F43F5E", "#F59E0B",
+            "#A855F7", "#EC4899", "#06B6D4", "#10B981"
+        ],
         hoveredPoint: null,
         animFrameId: null,
         pulseAngle: 0,
@@ -1682,14 +1594,13 @@ body {
 
     // DOM Elements
     const elements = {
-        // Dropdown & Banner
+        // Step 1: Seed Selection
         songSelect: document.getElementById("songSelect"),
         randomSongBtn: document.getElementById("randomSongBtn"),
         bannerTitle: document.getElementById("bannerTitle"),
         bannerArtist: document.getElementById("bannerArtist"),
         bannerGenre: document.getElementById("bannerGenre"),
         bannerTempo: document.getElementById("bannerTempo"),
-        samplesScroll: document.getElementById("samplesScroll"),
 
         // Custom Tuning
         customTuningToggle: document.getElementById("customTuningToggle"),
@@ -1705,7 +1616,7 @@ body {
         sliderAcousticVal: document.getElementById("sliderAcousticVal"),
         applyCustomBtn: document.getElementById("applyCustomBtn"),
 
-        // Algorithm Controls
+        // Step 2: Algorithm Controls
         algoTabs: document.querySelectorAll(".tab-btn"),
         kmeansControls: document.getElementById("kmeansControls"),
         hierarchicalControls: document.getElementById("hierarchicalControls"),
@@ -1724,21 +1635,23 @@ body {
         minPtsSlider: document.getElementById("minPtsSlider"),
         minPtsVal: document.getElementById("minPtsVal"),
 
-        // Recommendation Settings
+        // Step 3: Recommendation Settings
         metricBtns: document.querySelectorAll("[data-metric]"),
         filterClusterCheckbox: document.getElementById("filterClusterCheckbox"),
         topNSlider: document.getElementById("topNSlider"),
         topNVal: document.getElementById("topNVal"),
+
+        // Action: Validation Curves Button
+        openCurveBtn: document.getElementById("openCurveBtn"),
 
         // KPI Badges
         metricClusters: document.getElementById("metricClusters"),
         metricSilhouette: document.getElementById("metricSilhouette"),
         metricSilBadge: document.getElementById("metricSilBadge"),
         metricInertia: document.getElementById("metricInertia"),
-        metricDB: document.getElementById("metricDB"),
         metricNoise: document.getElementById("metricNoise"),
 
-        // Canvas & Tooltip
+        // 2D Canvas & Tooltip
         audioSpaceCanvas: document.getElementById("audioSpaceCanvas"),
         canvasTooltip: document.getElementById("canvasTooltip"),
         canvasLegend: document.getElementById("canvasLegend"),
@@ -1766,10 +1679,8 @@ body {
         // Pedagogical Insight
         explanationText: document.getElementById("explanationText"),
 
-        // Modal
+        // Validation Modal
         curveModal: document.getElementById("curveModal"),
-        openCurveBtnHeader: document.getElementById("openCurveBtnHeader"),
-        openCurveBtnSidebar: document.getElementById("openCurveBtnSidebar"),
         closeCurveBtn: document.getElementById("closeCurveBtn"),
         elbowChartCanvas: document.getElementById("elbowChart"),
         silhouetteChartCanvas: document.getElementById("silhouetteChart"),
@@ -1789,7 +1700,9 @@ body {
             state.seedSong = window.INITIAL_DATA.seed_song || null;
             state.recommendations = window.INITIAL_DATA.recommendations || [];
             state.radar = window.INITIAL_DATA.radar || null;
-            state.clusterColors = window.INITIAL_DATA.cluster_colors || [];
+            if (window.INITIAL_DATA.cluster_colors && window.INITIAL_DATA.cluster_colors.length > 0) {
+                state.clusterColors = window.INITIAL_DATA.cluster_colors;
+            }
 
             if (state.seedSong) {
                 state.seedId = state.seedSong.id;
@@ -1797,7 +1710,6 @@ body {
         }
 
         setupEventListeners();
-        setupCanvasHighDPI();
         renderLegend();
         renderCanvas();
         renderRadarChart();
@@ -1805,21 +1717,77 @@ body {
         updateSilhouetteStatus(state.metrics.silhouette);
     }
 
-    // High-DPI Canvas Setup
-    function setupCanvasHighDPI() {
-        const canvas = elements.audioSpaceCanvas;
-        if (!canvas) return;
-        const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
+    // Dynamic Coordinate Bounds (ensures no song or centroid is clipped)
+    function getCanvasBounds() {
+        let minX = -8.0, maxX = 3.0, minY = -2.8, maxY = 3.2;
 
-        canvas.width = rect.width * dpr;
-        canvas.height = (rect.height || 420) * dpr;
+        if (state.points && state.points.length > 0) {
+            let pMinX = Infinity, pMaxX = -Infinity, pMinY = Infinity, pMaxY = -Infinity;
 
-        const ctx = canvas.getContext("2d");
-        ctx.scale(dpr, dpr);
+            for (let i = 0; i < state.points.length; i++) {
+                const pt = state.points[i];
+                if (pt.x < pMinX) pMinX = pt.x;
+                if (pt.x > pMaxX) pMaxX = pt.x;
+                if (pt.y < pMinY) pMinY = pt.y;
+                if (pt.y > pMaxY) pMaxY = pt.y;
+            }
+
+            if (state.seedSong && typeof state.seedSong.pca_x === "number") {
+                if (state.seedSong.pca_x < pMinX) pMinX = state.seedSong.pca_x;
+                if (state.seedSong.pca_x > pMaxX) pMaxX = state.seedSong.pca_x;
+                if (state.seedSong.pca_y < pMinY) pMinY = state.seedSong.pca_y;
+                if (state.seedSong.pca_y > pMaxY) pMaxY = state.seedSong.pca_y;
+            }
+
+            if (state.centroids && state.centroids.length > 0) {
+                state.centroids.forEach(c => {
+                    if (c && c.length >= 2) {
+                        if (c[0] < pMinX) pMinX = c[0];
+                        if (c[0] > pMaxX) pMaxX = c[0];
+                        if (c[1] < pMinY) pMinY = c[1];
+                        if (c[1] > pMaxY) pMaxY = c[1];
+                    }
+                });
+            }
+
+            const spanX = (pMaxX - pMinX) || 1.0;
+            const spanY = (pMaxY - pMinY) || 1.0;
+            minX = pMinX - spanX * 0.08;
+            maxX = pMaxX + spanX * 0.08;
+            minY = pMinY - spanY * 0.08;
+            maxY = pMaxY + spanY * 0.08;
+        }
+
+        return { minX, maxX, minY, maxY };
     }
 
-    // Legend Generator
+    // Coordinate Mapping (2D PCA -> Logical CSS Pixels)
+    function mapCoords(x, y, width, height, bounds) {
+        const padX = 42;
+        const padY = 36;
+        const px = padX + ((x - bounds.minX) / (bounds.maxX - bounds.minX)) * (width - 2 * padX);
+        const py = height - (padY + ((y - bounds.minY) / (bounds.maxY - bounds.minY)) * (height - 2 * padY));
+        return { px, py };
+    }
+
+    // Synchronize High-DPI Canvas Buffer with Element Size
+    function syncCanvasDPI(canvas) {
+        if (!canvas) return { width: 800, height: 420, dpr: 1 };
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(300, Math.round(rect.width || canvas.clientWidth || 800));
+        const height = Math.max(250, Math.round(rect.height || canvas.clientHeight || 420));
+        const bufW = Math.round(width * dpr);
+        const bufH = Math.round(height * dpr);
+
+        if (canvas.width !== bufW || canvas.height !== bufH) {
+            canvas.width = bufW;
+            canvas.height = bufH;
+        }
+        return { width, height, dpr };
+    }
+
+    // Dynamic Cluster Color Legend
     function renderLegend() {
         if (!elements.canvasLegend) return;
         const nClusters = state.metrics.n_clusters || state.k;
@@ -1845,27 +1813,12 @@ body {
             html += `
                 <div class="legend-item">
                     <span class="legend-dot" style="background-color: #64748B"></span>
-                    <span>Noise / Outlier Tracks</span>
+                    <span>Noise / Outliers</span>
                 </div>
             `;
         }
 
         elements.canvasLegend.innerHTML = html;
-    }
-
-    // Coordinate Mapping (2D PCA Coordinates -> Canvas Pixels)
-    function mapCoords(x, y, width, height) {
-        // Bounds for 2D PCA in standard dataset: roughly [-3.5, 3.5]
-        const padX = 50;
-        const padY = 40;
-        const minX = -3.8;
-        const maxX = 3.8;
-        const minY = -2.8;
-        const maxY = 2.8;
-
-        const px = padX + ((x - minX) / (maxX - minX)) * (width - 2 * padX);
-        const py = height - (padY + ((y - minY) / (maxY - minY)) * (height - 2 * padY));
-        return { px, py };
     }
 
     // Animation Loop for Pulsing Glow on Active Seed Song
@@ -1881,19 +1834,24 @@ body {
     // Main 2D Canvas Renderer
     function renderCanvas() {
         const canvas = elements.audioSpaceCanvas;
-        const dpr = window.devicePixelRatio || 1;
-        const width = canvas.width / dpr;
-        const height = canvas.height / dpr;
+        if (!canvas) return;
+
+        const { width, height, dpr } = syncCanvasDPI(canvas);
         const ctx = canvas.getContext("2d");
 
-        // Clear Background
-        ctx.fillStyle = "#080C14";
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        const bounds = getCanvasBounds();
+
+        // 1. Clear Background
+        ctx.fillStyle = "#070B12";
         ctx.fillRect(0, 0, width, height);
 
-        // Subtle Background Grid Lines
-        ctx.strokeStyle = "rgba(34, 48, 74, 0.4)";
+        // 2. Subtle Background Grid Lines
+        ctx.strokeStyle = "rgba(27, 41, 69, 0.4)";
         ctx.lineWidth = 1;
-        const gridStep = 40;
+        const gridStep = 45;
         for (let x = gridStep; x < width; x += gridStep) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
@@ -1907,50 +1865,52 @@ body {
             ctx.stroke();
         }
 
-        // Draw Origin Crosshair
-        const origin = mapCoords(0, 0, width, height);
-        ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(origin.px, 0);
-        ctx.lineTo(origin.px, height);
-        ctx.moveTo(0, origin.py);
-        ctx.lineTo(width, origin.py);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Active Seed Song Coordinates
-        let seedCoords = null;
-        if (state.seedSong) {
-            seedCoords = mapCoords(state.seedSong.pca_x, state.seedSong.pca_y, width, height);
+        // 3. Origin Crosshair (0, 0 in PCA space)
+        if (bounds.minX <= 0 && bounds.maxX >= 0 && bounds.minY <= 0 && bounds.maxY >= 0) {
+            const origin = mapCoords(0, 0, width, height, bounds);
+            ctx.strokeStyle = "rgba(56, 189, 248, 0.22)";
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(origin.px, 0);
+            ctx.lineTo(origin.px, height);
+            ctx.moveTo(0, origin.py);
+            ctx.lineTo(width, origin.py);
+            ctx.stroke();
+            ctx.setLineDash([]);
         }
 
-        // Draw Connecting Rays from Seed Track to Top Recommendations
+        // 4. Coordinates for Active Seed Song
+        let seedCoords = null;
+        if (state.seedSong && typeof state.seedSong.pca_x === "number") {
+            seedCoords = mapCoords(state.seedSong.pca_x, state.seedSong.pca_y, width, height, bounds);
+        }
+
+        // 5. Draw Connecting Rays from Seed Track to Top Recommendations
         if (seedCoords && state.recommendations && state.recommendations.length > 0) {
             state.recommendations.forEach((rec, idx) => {
-                const recCoords = mapCoords(rec.pca_x, rec.pca_y, width, height);
+                if (typeof rec.pca_x !== "number") return;
+                const recCoords = mapCoords(rec.pca_x, rec.pca_y, width, height, bounds);
 
-                // Gradient ray
                 const grad = ctx.createLinearGradient(seedCoords.px, seedCoords.py, recCoords.px, recCoords.py);
-                grad.addColorStop(0, "rgba(29, 185, 84, 0.7)");
-                grad.addColorStop(1, "rgba(56, 189, 248, 0.3)");
+                grad.addColorStop(0, "rgba(29, 185, 84, 0.75)");
+                grad.addColorStop(1, "rgba(56, 189, 248, 0.35)");
 
                 ctx.strokeStyle = grad;
-                ctx.lineWidth = Math.max(1, 3.0 - idx * 0.4);
-                ctx.setLineDash([6, 3]);
+                ctx.lineWidth = Math.max(1.2, 2.8 - idx * 0.35);
+                ctx.setLineDash([5, 3]);
                 ctx.beginPath();
                 ctx.moveTo(seedCoords.px, seedCoords.py);
                 ctx.lineTo(recCoords.px, recCoords.py);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // Draw distance pill label on ray midpoint
+                // Midpoint Rank Badge
                 const midX = (seedCoords.px + recCoords.px) / 2;
                 const midY = (seedCoords.py + recCoords.py) / 2;
-                ctx.fillStyle = "rgba(11, 15, 23, 0.85)";
-                ctx.fillRect(midX - 16, midY - 8, 32, 16);
-                ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
-                ctx.strokeRect(midX - 16, midY - 8, 32, 16);
+                ctx.fillStyle = "rgba(13, 20, 36, 0.88)";
+                ctx.fillRect(midX - 14, midY - 8, 28, 16);
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.55)";
+                ctx.strokeRect(midX - 14, midY - 8, 28, 16);
                 ctx.fillStyle = "#38BDF8";
                 ctx.font = "9px 'JetBrains Mono', monospace";
                 ctx.textAlign = "center";
@@ -1959,10 +1919,11 @@ body {
             });
         }
 
-        // Draw Centroids
+        // 6. Draw Centroids
         if (state.centroids && state.centroids.length > 0) {
             state.centroids.forEach((c, idx) => {
-                const cPos = mapCoords(c[0], c[1], width, height);
+                if (!c || c.length < 2) return;
+                const cPos = mapCoords(c[0], c[1], width, height, bounds);
                 const color = state.clusterColors[idx % state.clusterColors.length] || "#1DB954";
 
                 // Centroid outer halo
@@ -1974,44 +1935,45 @@ body {
 
                 // Crosshair
                 ctx.beginPath();
-                ctx.moveTo(cPos.px - 17, cPos.py);
-                ctx.lineTo(cPos.px + 17, cPos.py);
-                ctx.moveTo(cPos.px, cPos.py - 17);
-                ctx.lineTo(cPos.px, cPos.py + 17);
+                ctx.moveTo(cPos.px - 16, cPos.py);
+                ctx.lineTo(cPos.px + 16, cPos.py);
+                ctx.moveTo(cPos.px, cPos.py - 16);
+                ctx.lineTo(cPos.px, cPos.py + 16);
                 ctx.stroke();
 
-                // Centroid badge label
+                // Center Dot
                 ctx.fillStyle = color;
                 ctx.beginPath();
-                ctx.arc(cPos.px, cPos.py, 5, 0, Math.PI * 2);
+                ctx.arc(cPos.px, cPos.py, 4.5, 0, Math.PI * 2);
                 ctx.fill();
 
+                // Label
                 ctx.fillStyle = "#F8FAFC";
                 ctx.font = "bold 9px 'Plus Jakarta Sans', sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(`C${idx + 1}`, cPos.px, cPos.py - 18);
+                ctx.fillText(`C${idx + 1}`, cPos.px, cPos.py - 17);
             });
         }
 
-        // Draw Song Points
+        // 7. Draw Song Points
         state.points.forEach((p) => {
-            const pos = mapCoords(p.x, p.y, width, height);
+            const pos = mapCoords(p.x, p.y, width, height, bounds);
             const isHovered = state.hoveredPoint && state.hoveredPoint.id === p.id;
             const isSeed = state.seedSong && state.seedSong.id === p.id;
 
-            let radius = isHovered ? 7 : (p.type === "noise" ? 3.5 : 4.5);
-            let color = p.color;
+            let radius = isHovered ? 7.5 : (p.type === "noise" ? 3.5 : 4.5);
+            let color = p.color || "#1DB954";
 
             // Highlight if point is one of the recommendations
             const isRec = state.recommendations.some(r => r.id === p.id);
             if (isRec) {
-                radius = isHovered ? 8 : 6.5;
+                radius = isHovered ? 8.5 : 6.5;
             }
 
             // Glow around point
             if (isHovered || isRec) {
                 ctx.fillStyle = color;
-                ctx.globalAlpha = 0.3;
+                ctx.globalAlpha = 0.35;
                 ctx.beginPath();
                 ctx.arc(pos.px, pos.py, radius + 4, 0, Math.PI * 2);
                 ctx.fill();
@@ -2030,7 +1992,7 @@ body {
             ctx.stroke();
         });
 
-        // Draw Active Seed Song Pulse Indicator
+        // 8. Draw Active Seed Song Pulse Indicator
         if (seedCoords) {
             const pulseRadius = 14 + Math.sin(state.pulseAngle) * 4;
             const pulseAlpha = 0.4 + Math.sin(state.pulseAngle) * 0.25;
@@ -2058,6 +2020,8 @@ body {
             ctx.textAlign = "center";
             ctx.fillText("★ SEED", seedCoords.px, seedCoords.py - 18);
         }
+
+        ctx.restore();
     }
 
     // Custom Lightweight Radar Spider Chart
@@ -2078,7 +2042,7 @@ body {
 
         const centerX = width / 2;
         const centerY = height / 2 + 10;
-        const radius = 70;
+        const radius = 68;
 
         const radarData = state.radar || {
             labels: ["Dance", "Energy", "Valence", "Acoustic", "Instrumental", "Speech"],
@@ -2093,7 +2057,7 @@ body {
         const levels = 4;
         for (let l = 1; l <= levels; l++) {
             const levelRadius = (radius / levels) * l;
-            ctx.strokeStyle = "rgba(34, 48, 74, 0.6)";
+            ctx.strokeStyle = "rgba(27, 41, 69, 0.6)";
             ctx.lineWidth = 1;
             ctx.beginPath();
             for (let i = 0; i < numAxes; i++) {
@@ -2107,8 +2071,8 @@ body {
             ctx.stroke();
         }
 
-        // Draw Axis Rays & Labels
-        ctx.font = "10px 'Plus Jakarta Sans', sans-serif";
+        // Draw Radial Spokes & Dimension Labels
+        ctx.font = "9.5px 'Plus Jakarta Sans', sans-serif";
         ctx.fillStyle = "#94A3B8";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -2118,21 +2082,22 @@ body {
             const x = centerX + Math.cos(angle) * radius;
             const y = centerY + Math.sin(angle) * radius;
 
-            ctx.strokeStyle = "rgba(51, 69, 102, 0.5)";
+            ctx.strokeStyle = "rgba(27, 41, 69, 0.7)";
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.lineTo(x, y);
             ctx.stroke();
 
-            // Label position slightly outside
+            // Label position with offset
             const labelX = centerX + Math.cos(angle) * (radius + 18);
-            const labelY = centerY + Math.sin(angle) * (radius + 14);
+            const labelY = centerY + Math.sin(angle) * (radius + 18);
             ctx.fillText(radarData.labels[i], labelX, labelY);
         }
 
-        // Draw Recommended Song Polygon (Sky Blue)
+        // Draw Top Match Recommendation Polygon (Sky Blue)
         if (radarData.rec_values && radarData.rec_values.length === numAxes) {
-            ctx.fillStyle = "rgba(56, 189, 248, 0.25)";
+            ctx.fillStyle = "rgba(56, 189, 248, 0.22)";
             ctx.strokeStyle = "#38BDF8";
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -2169,38 +2134,59 @@ body {
         }
     }
 
-    // Silhouette Status Evaluation Tag
+    // Silhouette Status Evaluation Badge
     function updateSilhouetteStatus(score) {
         if (!elements.metricSilBadge) return;
         if (score === "N/A" || score === null || score === undefined) {
-            elements.metricSilBadge.textContent = "Chưa đủ cụm";
+            elements.metricSilBadge.textContent = "N/A";
             elements.metricSilBadge.style.color = "#64748B";
             return;
         }
         const s = parseFloat(score);
         if (s >= 0.35) {
-            elements.metricSilBadge.textContent = "✨ Phân tách rất tốt";
+            elements.metricSilBadge.textContent = "✨ Strong Structure";
             elements.metricSilBadge.style.color = "#1DB954";
         } else if (s >= 0.20) {
-            elements.metricSilBadge.textContent = "✨ Cụm hợp lý";
+            elements.metricSilBadge.textContent = "✨ Reasonable";
             elements.metricSilBadge.style.color = "#38BDF8";
         } else if (s >= 0.05) {
-            elements.metricSilBadge.textContent = "⚡ Có giao thoa nhẹ";
+            elements.metricSilBadge.textContent = "⚡ Overlapping";
             elements.metricSilBadge.style.color = "#F59E0B";
         } else {
-            elements.metricSilBadge.textContent = "⚠️ Cụm phân tán";
+            elements.metricSilBadge.textContent = "⚠️ Dispersed";
             elements.metricSilBadge.style.color = "#F43F5E";
         }
     }
 
-    // Update UI Elements with Latest State
+    // Update Seed Track Banner and Profile Card
+    function updateSeedBanner(seed) {
+        if (!seed) return;
+        if (elements.bannerTitle) elements.bannerTitle.textContent = seed.title;
+        if (elements.bannerArtist) elements.bannerArtist.textContent = `${seed.artist} (${seed.year || 2024})`;
+        if (elements.bannerGenre) elements.bannerGenre.textContent = `🏷️ ${seed.genre}`;
+        if (elements.bannerTempo) elements.bannerTempo.textContent = `🥁 ${seed.tempo} BPM`;
+
+        // Profile Card
+        if (elements.profileSeedTitle) elements.profileSeedTitle.textContent = seed.title;
+        if (elements.profileSeedArtist) elements.profileSeedArtist.textContent = seed.artist;
+        if (elements.barSeedDance) elements.barSeedDance.style.width = `${seed.danceability * 100}%`;
+        if (elements.valSeedDance) elements.valSeedDance.textContent = seed.danceability;
+        if (elements.barSeedEnergy) elements.barSeedEnergy.style.width = `${seed.energy * 100}%`;
+        if (elements.valSeedEnergy) elements.valSeedEnergy.textContent = seed.energy;
+        if (elements.barSeedValence) elements.barSeedValence.style.width = `${seed.valence * 100}%`;
+        if (elements.valSeedValence) elements.valSeedValence.textContent = seed.valence;
+        if (elements.barSeedAcoustic) elements.barSeedAcoustic.style.width = `${seed.acousticness * 100}%`;
+        if (elements.valSeedAcoustic) elements.valSeedAcoustic.textContent = seed.acousticness;
+    }
+
+    // Update UI Elements with Latest Server Response State
     function updateUI(data) {
         if (data.metrics) {
             state.metrics = data.metrics;
-            elements.metricClusters.textContent = data.metrics.n_clusters;
-            elements.metricSilhouette.textContent = data.metrics.silhouette;
-            elements.metricInertia.textContent = data.metrics.inertia;
-            elements.metricNoise.textContent = data.metrics.n_noise;
+            if (elements.metricClusters) elements.metricClusters.textContent = data.metrics.n_clusters;
+            if (elements.metricSilhouette) elements.metricSilhouette.textContent = data.metrics.silhouette;
+            if (elements.metricInertia) elements.metricInertia.textContent = data.metrics.inertia;
+            if (elements.metricNoise) elements.metricNoise.textContent = data.metrics.n_noise;
             updateSilhouetteStatus(data.metrics.silhouette);
         }
 
@@ -2210,43 +2196,21 @@ body {
         if (data.recommendations) state.recommendations = data.recommendations;
         if (data.radar) state.radar = data.radar;
 
-        // Update Seed Track Banner
+        // Update Seed Track Banner & Profile
         if (state.seedSong) {
-            elements.bannerTitle.textContent = state.seedSong.title;
-            elements.bannerArtist.textContent = `${state.seedSong.artist} (${state.seedSong.year})`;
-            elements.bannerGenre.textContent = `🏷️ ${state.seedSong.genre}`;
-            elements.bannerTempo.textContent = `🥁 ${state.seedSong.tempo} BPM`;
+            updateSeedBanner(state.seedSong);
 
-            // Profile Card
-            elements.profileSeedTitle.textContent = state.seedSong.title;
-            elements.profileSeedArtist.textContent = state.seedSong.artist;
-            elements.barSeedDance.style.width = `${state.seedSong.danceability * 100}%`;
-            elements.valSeedDance.textContent = state.seedSong.danceability;
-            elements.barSeedEnergy.style.width = `${state.seedSong.energy * 100}%`;
-            elements.valSeedEnergy.textContent = state.seedSong.energy;
-            elements.barSeedValence.style.width = `${state.seedSong.valence * 100}%`;
-            elements.valSeedValence.textContent = state.seedSong.valence;
-            elements.barSeedAcoustic.style.width = `${state.seedSong.acousticness * 100}%`;
-            elements.valSeedAcoustic.textContent = state.seedSong.acousticness;
-
-            // Update dropdown selection
             if (elements.songSelect && state.seedSong.id !== "custom") {
                 elements.songSelect.value = state.seedSong.id;
             }
-
-            // Sync quick sample chips
-            document.querySelectorAll(".sample-chip").forEach(chip => {
-                if (chip.getAttribute("data-song-id") === state.seedSong.id) {
-                    chip.classList.add("active");
-                } else {
-                    chip.classList.remove("active");
-                }
-            });
         }
 
-        // Update Recommendations Deck (Playlist rows)
-        if (state.recommendations) {
-            elements.recCountBadge.textContent = `Top ${state.recommendations.length}`;
+        // Update Recommendations Table
+        if (state.recommendations && elements.recsGrid) {
+            if (elements.recCountBadge) {
+                elements.recCountBadge.textContent = `Top ${state.recommendations.length}`;
+            }
+
             let recsHtml = "";
             state.recommendations.forEach(rec => {
                 recsHtml += `
@@ -2266,15 +2230,15 @@ body {
                             </div>
                             <span class="match-text">${rec.match_percentage}%</span>
                         </div>
-                        <button class="btn-play-seed" data-song-id="${rec.id}" title="Chọn bài này làm Seed">
-                            ▶ Chọn
+                        <button class="btn-play-seed" data-song-id="${rec.id}" title="Select as Seed Track">
+                            ▶ Select
                         </button>
                     </div>
                 `;
             });
             elements.recsGrid.innerHTML = recsHtml;
 
-            // Attach listeners to "Chọn" buttons
+            // Attach listeners to "Select" buttons in table
             document.querySelectorAll(".btn-play-seed").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -2286,15 +2250,15 @@ body {
 
         // Update Radar Legends
         if (state.radar) {
-            elements.radarSeedLegend.textContent = state.radar.seed_title || "Seed";
-            elements.radarRecLegend.textContent = state.radar.rec_title || "Top Match";
+            if (elements.radarSeedLegend) elements.radarSeedLegend.textContent = state.radar.seed_title || "Seed";
+            if (elements.radarRecLegend) elements.radarRecLegend.textContent = state.radar.rec_title || "Top Match";
         }
 
         // Update Latency & Insight
-        if (data.metrics && data.metrics.inference_time_ms !== undefined) {
-            elements.recLatency.textContent = `Độ trễ: ~${data.metrics.inference_time_ms} ms`;
+        if (data.metrics && data.metrics.inference_time_ms !== undefined && elements.recLatency) {
+            elements.recLatency.textContent = `Latency: ~${data.metrics.inference_time_ms} ms`;
         }
-        if (data.explanation) {
+        if (data.explanation && elements.explanationText) {
             elements.explanationText.textContent = data.explanation;
         }
 
@@ -2335,40 +2299,59 @@ body {
         .catch(err => console.error("Cluster API network error:", err));
     }
 
-    // Select a New Seed Song
+    // Select a New Seed Song with Instant Reactive Visual Feedback
     function selectSeedSong(songId) {
         state.seedId = songId;
         state.customFeatures = null;
+
+        // Immediate local lookup for instantaneous visual update on the graph!
+        const found = state.points.find(p => p.id === songId);
+        if (found) {
+            state.seedSong = {
+                id: found.id,
+                title: found.title,
+                artist: found.artist,
+                genre: found.genre,
+                year: found.year,
+                tempo: found.tempo,
+                danceability: found.danceability,
+                energy: found.energy,
+                valence: found.valence || 0.5,
+                acousticness: found.acousticness || 0.2,
+                pca_x: found.x,
+                pca_y: found.y
+            };
+            if (elements.songSelect && elements.songSelect.value !== songId) {
+                elements.songSelect.value = songId;
+            }
+            updateSeedBanner(state.seedSong);
+            renderCanvas();
+        }
+
         triggerClusterUpdate();
     }
 
     // Setup All Event Listeners
     function setupEventListeners() {
         // 1. Dropdown Selection
-        elements.songSelect.addEventListener("change", (e) => {
-            selectSeedSong(e.target.value);
-        });
-
-        // 2. Random Seed Song Button
-        elements.randomSongBtn.addEventListener("click", () => {
-            const options = elements.songSelect.options;
-            const randomIndex = Math.floor(Math.random() * options.length);
-            elements.songSelect.selectedIndex = randomIndex;
-            selectSeedSong(options[randomIndex].value);
-        });
-
-        // 3. Curated Quick Sample Chips Ribbon (optional - may be hidden)
-        if (elements.samplesScroll) {
-            elements.samplesScroll.addEventListener("click", (e) => {
-                const chip = e.target.closest(".sample-chip");
-                if (chip) {
-                    const songId = chip.getAttribute("data-song-id");
-                    selectSeedSong(songId);
-                }
+        if (elements.songSelect) {
+            elements.songSelect.addEventListener("change", (e) => {
+                selectSeedSong(e.target.value);
             });
         }
 
-        // 4. Algorithm Tabs
+        // 2. Random Seed Song Button
+        if (elements.randomSongBtn && elements.songSelect) {
+            elements.randomSongBtn.addEventListener("click", () => {
+                const options = elements.songSelect.options;
+                if (!options || options.length === 0) return;
+                const randomIndex = Math.floor(Math.random() * options.length);
+                elements.songSelect.selectedIndex = randomIndex;
+                selectSeedSong(options[randomIndex].value);
+            });
+        }
+
+        // 3. Algorithm Tabs
         elements.algoTabs.forEach(tab => {
             tab.addEventListener("click", () => {
                 elements.algoTabs.forEach(t => t.classList.remove("active"));
@@ -2376,20 +2359,22 @@ body {
                 state.algorithm = tab.getAttribute("data-algo");
 
                 // Toggle visibility
-                elements.kmeansControls.classList.toggle("hidden", state.algorithm !== "kmeans");
-                elements.hierarchicalControls.classList.toggle("hidden", state.algorithm !== "hierarchical");
-                elements.dbscanControls.classList.toggle("hidden", state.algorithm !== "dbscan");
+                if (elements.kmeansControls) elements.kmeansControls.classList.toggle("hidden", state.algorithm !== "kmeans");
+                if (elements.hierarchicalControls) elements.hierarchicalControls.classList.toggle("hidden", state.algorithm !== "hierarchical");
+                if (elements.dbscanControls) elements.dbscanControls.classList.toggle("hidden", state.algorithm !== "dbscan");
 
                 triggerClusterUpdate();
             });
         });
 
-        // 5. K-Means Sliders
-        elements.kSlider.addEventListener("input", (e) => {
-            state.k = parseInt(e.target.value);
-            elements.kVal.textContent = state.k;
-            debounce(triggerClusterUpdate, 200);
-        });
+        // 4. K-Means Sliders
+        if (elements.kSlider) {
+            elements.kSlider.addEventListener("input", (e) => {
+                state.k = parseInt(e.target.value);
+                if (elements.kVal) elements.kVal.textContent = state.k;
+                debounce(triggerClusterUpdate, 200);
+            });
+        }
 
         elements.initBtns.forEach(btn => {
             btn.addEventListener("click", () => {
@@ -2400,32 +2385,40 @@ body {
             });
         });
 
-        // 6. Hierarchical Controls
-        elements.hierKSlider.addEventListener("input", (e) => {
-            state.k = parseInt(e.target.value);
-            elements.hierKVal.textContent = state.k;
-            debounce(triggerClusterUpdate, 200);
-        });
+        // 5. Hierarchical Controls
+        if (elements.hierKSlider) {
+            elements.hierKSlider.addEventListener("input", (e) => {
+                state.k = parseInt(e.target.value);
+                if (elements.hierKVal) elements.hierKVal.textContent = state.k;
+                debounce(triggerClusterUpdate, 200);
+            });
+        }
 
-        elements.linkageSelect.addEventListener("change", (e) => {
-            state.linkage = e.target.value;
-            triggerClusterUpdate();
-        });
+        if (elements.linkageSelect) {
+            elements.linkageSelect.addEventListener("change", (e) => {
+                state.linkage = e.target.value;
+                triggerClusterUpdate();
+            });
+        }
 
-        // 7. DBSCAN Controls
-        elements.epsSlider.addEventListener("input", (e) => {
-            state.eps = parseFloat(e.target.value);
-            elements.epsVal.textContent = state.eps.toFixed(2);
-            debounce(triggerClusterUpdate, 250);
-        });
+        // 6. DBSCAN Controls
+        if (elements.epsSlider) {
+            elements.epsSlider.addEventListener("input", (e) => {
+                state.eps = parseFloat(e.target.value);
+                if (elements.epsVal) elements.epsVal.textContent = state.eps.toFixed(2);
+                debounce(triggerClusterUpdate, 250);
+            });
+        }
 
-        elements.minPtsSlider.addEventListener("input", (e) => {
-            state.minSamples = parseInt(e.target.value);
-            elements.minPtsVal.textContent = state.minSamples;
-            debounce(triggerClusterUpdate, 250);
-        });
+        if (elements.minPtsSlider) {
+            elements.minPtsSlider.addEventListener("input", (e) => {
+                state.minSamples = parseInt(e.target.value);
+                if (elements.minPtsVal) elements.minPtsVal.textContent = state.minSamples;
+                debounce(triggerClusterUpdate, 250);
+            });
+        }
 
-        // 8. Distance Metric & Filter
+        // 7. Distance Metric & Filter
         elements.metricBtns.forEach(btn => {
             btn.addEventListener("click", () => {
                 elements.metricBtns.forEach(b => b.classList.remove("active"));
@@ -2435,22 +2428,28 @@ body {
             });
         });
 
-        elements.filterClusterCheckbox.addEventListener("change", (e) => {
-            state.filterCluster = e.target.checked;
-            triggerClusterUpdate();
-        });
-
-        elements.topNSlider.addEventListener("input", (e) => {
-            state.topN = parseInt(e.target.value);
-            elements.topNVal.textContent = state.topN;
-            debounce(triggerClusterUpdate, 200);
-        });
-
-        // 9. Custom Audio Sliders
-        const updateSliderDisplay = (slider, display) => {
-            slider.addEventListener("input", (e) => {
-                display.textContent = e.target.value;
+        if (elements.filterClusterCheckbox) {
+            elements.filterClusterCheckbox.addEventListener("change", (e) => {
+                state.filterCluster = e.target.checked;
+                triggerClusterUpdate();
             });
+        }
+
+        if (elements.topNSlider) {
+            elements.topNSlider.addEventListener("input", (e) => {
+                state.topN = parseInt(e.target.value);
+                if (elements.topNVal) elements.topNVal.textContent = state.topN;
+                debounce(triggerClusterUpdate, 200);
+            });
+        }
+
+        // 8. Custom Audio Sliders
+        const updateSliderDisplay = (slider, display) => {
+            if (slider && display) {
+                slider.addEventListener("input", (e) => {
+                    display.textContent = e.target.value;
+                });
+            }
         };
         updateSliderDisplay(elements.sliderDance, elements.sliderDanceVal);
         updateSliderDisplay(elements.sliderEnergy, elements.sliderEnergyVal);
@@ -2458,116 +2457,123 @@ body {
         updateSliderDisplay(elements.sliderTempo, elements.sliderTempoVal);
         updateSliderDisplay(elements.sliderAcoustic, elements.sliderAcousticVal);
 
-        elements.applyCustomBtn.addEventListener("click", () => {
-            state.customFeatures = [
-                parseFloat(elements.sliderDance.value),
-                parseFloat(elements.sliderEnergy.value),
-                parseFloat(elements.sliderValence.value),
-                parseFloat(elements.sliderTempo.value),
-                parseFloat(elements.sliderAcoustic.value),
-                0.0,   // instrumentalness
-                0.06,  // speechiness
-                -6.0   // loudness
-            ];
-            triggerClusterUpdate();
-        });
+        if (elements.applyCustomBtn) {
+            elements.applyCustomBtn.addEventListener("click", () => {
+                state.customFeatures = [
+                    parseFloat(elements.sliderDance.value),
+                    parseFloat(elements.sliderEnergy.value),
+                    parseFloat(elements.sliderValence.value),
+                    parseFloat(elements.sliderTempo.value),
+                    parseFloat(elements.sliderAcoustic.value),
+                    0.0,   // instrumentalness
+                    0.06,  // speechiness
+                    -6.0   // loudness
+                ];
+                triggerClusterUpdate();
+            });
+        }
 
-        // 10. Interactive Canvas Hover & Click
+        // 9. Interactive Canvas Hover & Click (Point Selection)
         const canvas = elements.audioSpaceCanvas;
-        canvas.addEventListener("mousemove", (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+        if (canvas) {
+            canvas.addEventListener("mousemove", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
 
-            const width = rect.width;
-            const height = rect.height;
+                const width = rect.width;
+                const height = rect.height;
+                const bounds = getCanvasBounds();
 
-            let closestPoint = null;
-            let minDist = 14; // hover hit radius
+                let closestPoint = null;
+                let minDist = 14;
 
-            state.points.forEach(p => {
-                const pos = mapCoords(p.x, p.y, width, height);
-                const dx = pos.px - mouseX;
-                const dy = pos.py - mouseY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < minDist) {
-                    minDist = dist;
-                    closestPoint = p;
+                state.points.forEach(p => {
+                    const pos = mapCoords(p.x, p.y, width, height, bounds);
+                    const dx = pos.px - mouseX;
+                    const dy = pos.py - mouseY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestPoint = p;
+                    }
+                });
+
+                state.hoveredPoint = closestPoint;
+
+                if (closestPoint && elements.canvasTooltip) {
+                    elements.canvasTooltip.style.display = "block";
+                    elements.canvasTooltip.style.left = `${mouseX + 15}px`;
+                    elements.canvasTooltip.style.top = `${mouseY - 20}px`;
+
+                    const moodName = closestPoint.cluster === -1 ? "Noise / Outlier" : `Cluster #${closestPoint.cluster + 1}`;
+                    elements.canvasTooltip.innerHTML = `
+                        <div class="tooltip-title">${closestPoint.title}</div>
+                        <div class="tooltip-artist">${closestPoint.artist} • ${closestPoint.genre}</div>
+                        <div class="tooltip-metrics">
+                            <span class="tooltip-badge">🥁 ${closestPoint.tempo} BPM</span>
+                            <span class="tooltip-badge">⚡ ${closestPoint.energy} Energy</span>
+                            <span class="tooltip-badge">💃 ${closestPoint.danceability} Dance</span>
+                            <span class="tooltip-badge" style="color:${closestPoint.color}">${moodName}</span>
+                        </div>
+                    `;
+                } else if (elements.canvasTooltip) {
+                    elements.canvasTooltip.style.display = "none";
                 }
             });
 
-            state.hoveredPoint = closestPoint;
+            canvas.addEventListener("mouseleave", () => {
+                state.hoveredPoint = null;
+                if (elements.canvasTooltip) elements.canvasTooltip.style.display = "none";
+            });
 
-            if (closestPoint) {
-                elements.canvasTooltip.style.display = "block";
-                elements.canvasTooltip.style.left = `${mouseX + 15}px`;
-                elements.canvasTooltip.style.top = `${mouseY - 20}px`;
+            canvas.addEventListener("click", () => {
+                if (state.hoveredPoint) {
+                    selectSeedSong(state.hoveredPoint.id);
+                }
+            });
+        }
 
-                const moodName = closestPoint.cluster === -1 ? "Noise / Outlier" : `Cluster #${closestPoint.cluster + 1}`;
-                elements.canvasTooltip.innerHTML = `
-                    <div class="tooltip-title">${closestPoint.title}</div>
-                    <div class="tooltip-artist">${closestPoint.artist} • ${closestPoint.genre}</div>
-                    <div class="tooltip-metrics">
-                        <span class="tooltip-badge">🥁 ${closestPoint.tempo} BPM</span>
-                        <span class="tooltip-badge">⚡ ${closestPoint.energy} Energy</span>
-                        <span class="tooltip-badge">💃 ${closestPoint.danceability} Dance</span>
-                        <span class="tooltip-badge" style="color:${closestPoint.color}">${moodName}</span>
-                    </div>
-                `;
-            } else {
-                elements.canvasTooltip.style.display = "none";
-            }
-        });
-
-        canvas.addEventListener("mouseleave", () => {
-            state.hoveredPoint = null;
-            elements.canvasTooltip.style.display = "none";
-        });
-
-        canvas.addEventListener("click", () => {
-            if (state.hoveredPoint) {
-                selectSeedSong(state.hoveredPoint.id);
-            }
-        });
-
-        // 11. Modal Triggers
+        // 10. Validation Curves Modal Triggers
         const openModal = () => {
-            elements.curveModal.classList.remove("hidden");
+            if (elements.curveModal) elements.curveModal.classList.remove("hidden");
             loadValidationCurves();
         };
 
         const closeModal = () => {
-            elements.curveModal.classList.add("hidden");
+            if (elements.curveModal) elements.curveModal.classList.add("hidden");
         };
 
-        elements.openCurveBtnHeader.addEventListener("click", openModal);
-        elements.openCurveBtnSidebar.addEventListener("click", openModal);
-        elements.closeCurveBtn.addEventListener("click", closeModal);
-        elements.curveModal.addEventListener("click", (e) => {
-            if (e.target === elements.curveModal) closeModal();
-        });
+        if (elements.openCurveBtn) elements.openCurveBtn.addEventListener("click", openModal);
+        if (elements.closeCurveBtn) elements.closeCurveBtn.addEventListener("click", closeModal);
+        if (elements.curveModal) {
+            elements.curveModal.addEventListener("click", (e) => {
+                if (e.target === elements.curveModal) closeModal();
+            });
+        }
 
-        // Window resize responsive redraw
+        // Responsive window redraw
         window.addEventListener("resize", () => {
-            setupCanvasHighDPI();
             renderCanvas();
         });
     }
 
-    // Debounce helper
+    // Debounce Helper
     function debounce(func, wait) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(func, wait);
     }
 
-    // Load and Render Validation Curves (Elbow & Silhouette)
+    // Load and Render Validation Curves (Elbow SSE & Silhouette)
     function loadValidationCurves() {
         if (state.validationCurves) {
             renderValidationCharts(state.validationCurves);
             return;
         }
 
-        elements.modalBestKText.textContent = "Đang chạy gom cụm K-Means với K từ 2 đến 8...";
+        if (elements.modalBestKText) {
+            elements.modalBestKText.textContent = "Running K-Means evaluation across K in [2, 8]...";
+        }
 
         fetch("/api/validation-curve", {
             method: "POST",
@@ -2585,74 +2591,81 @@ body {
     }
 
     function renderValidationCharts(data) {
-        elements.modalBestKText.innerHTML = `
-            Số cụm tối ưu được đề xuất là <strong>K = ${data.best_k}</strong> 
-            (Hệ số Silhouette đạt đỉnh: <strong>${Math.max(...data.silhouette_curve)}</strong>).
-        `;
+        if (elements.modalBestKText) {
+            const peakSil = Math.max(...data.silhouette_curve);
+            elements.modalBestKText.innerHTML = `
+                Recommended optimal clusters: <strong>K = ${data.best_k}</strong> 
+                (Peak Silhouette Score: <strong>${peakSil}</strong>).
+            `;
+        }
 
         // 1. Elbow Chart (Chart.js)
-        if (elbowChartInstance) elbowChartInstance.destroy();
-        const ctxElbow = elements.elbowChartCanvas.getContext("2d");
-        elbowChartInstance = new Chart(ctxElbow, {
-            type: "line",
-            data: {
-                labels: data.k_values.map(k => `K=${k}`),
-                datasets: [{
-                    label: "Inertia (SSE)",
-                    data: data.elbow_curve,
-                    borderColor: "#F59E0B",
-                    backgroundColor: "rgba(245, 158, 11, 0.15)",
-                    borderWidth: 2.5,
-                    pointBackgroundColor: "#F59E0B",
-                    pointRadius: 4,
-                    fill: true,
-                    tension: 0.25
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+        if (elements.elbowChartCanvas) {
+            if (elbowChartInstance) elbowChartInstance.destroy();
+            const ctxElbow = elements.elbowChartCanvas.getContext("2d");
+            elbowChartInstance = new Chart(ctxElbow, {
+                type: "line",
+                data: {
+                    labels: data.k_values.map(k => `K=${k}`),
+                    datasets: [{
+                        label: "Inertia (SSE)",
+                        data: data.elbow_curve,
+                        borderColor: "#F59E0B",
+                        backgroundColor: "rgba(245, 158, 11, 0.15)",
+                        borderWidth: 2.5,
+                        pointBackgroundColor: "#F59E0B",
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.25
+                    }]
                 },
-                scales: {
-                    x: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } },
-                    y: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } },
+                        y: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } }
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // 2. Silhouette Chart (Chart.js)
-        if (silChartInstance) silChartInstance.destroy();
-        const ctxSil = elements.silhouetteChartCanvas.getContext("2d");
-        silChartInstance = new Chart(ctxSil, {
-            type: "line",
-            data: {
-                labels: data.k_values.map(k => `K=${k}`),
-                datasets: [{
-                    label: "Silhouette Score",
-                    data: data.silhouette_curve,
-                    borderColor: "#38BDF8",
-                    backgroundColor: "rgba(56, 189, 248, 0.15)",
-                    borderWidth: 2.5,
-                    pointBackgroundColor: data.k_values.map(k => k === data.best_k ? "#1DB954" : "#38BDF8"),
-                    pointRadius: data.k_values.map(k => k === data.best_k ? 8 : 4),
-                    fill: true,
-                    tension: 0.25
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+        if (elements.silhouetteChartCanvas) {
+            if (silChartInstance) silChartInstance.destroy();
+            const ctxSil = elements.silhouetteChartCanvas.getContext("2d");
+            silChartInstance = new Chart(ctxSil, {
+                type: "line",
+                data: {
+                    labels: data.k_values.map(k => `K=${k}`),
+                    datasets: [{
+                        label: "Silhouette Score",
+                        data: data.silhouette_curve,
+                        borderColor: "#38BDF8",
+                        backgroundColor: "rgba(56, 189, 248, 0.15)",
+                        borderWidth: 2.5,
+                        pointBackgroundColor: data.k_values.map(k => k === data.best_k ? "#1DB954" : "#38BDF8"),
+                        pointRadius: data.k_values.map(k => k === data.best_k ? 8 : 4),
+                        fill: true,
+                        tension: 0.25
+                    }]
                 },
-                scales: {
-                    x: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } },
-                    y: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } },
+                        y: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } }
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     // Start on DOM Ready

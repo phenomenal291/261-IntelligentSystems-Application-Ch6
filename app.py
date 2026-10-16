@@ -89,6 +89,10 @@ X_RAW = np.array([[t[col] for col in FEATURE_COLS] for t in TRACKS], dtype=float
 X_FEATURE_VECTORS = np.array([t["feature_vector"] for t in TRACKS], dtype=float)
 PCA_COORDS = np.array([[t["pca_x"], t["pca_y"]] for t in TRACKS], dtype=float)
 
+# Fit PCA for projecting dynamic / user-tuned feature vectors to 2D
+PCA_MODEL = PCA(n_components=2, random_state=42)
+PCA_MODEL.fit(X_FEATURE_VECTORS)
+
 # Fast Lookup Maps
 TRACK_MAP = {t["id"]: t for t in TRACKS}
 TRACK_INDEX_MAP = {t["id"]: i for i, t in enumerate(TRACKS)}
@@ -129,8 +133,8 @@ def run_clustering(algorithm="kmeans", k=4, init="k-means++", linkage="ward", ep
                 centroids_2d.append([0.0, 0.0])
 
         explanation = (
-            f"🎯 K-Means: Gom {n_samples} bài hát vào K={k} cụm tâm trạng (Inertia SSE = {inertia:.1f}). "
-            f"Khởi tạo '{init}' giúp phân bố đều các tâm cụm theo thuộc tính âm học."
+            f"🎯 K-Means: Partitioned {n_samples} tracks into K={k} acoustic clusters (SSE = {inertia:.1f}). "
+            f"'{init}' initialization provides well-distributed initial centroids."
         )
 
     elif algorithm == "hierarchical":
@@ -155,8 +159,8 @@ def run_clustering(algorithm="kmeans", k=4, init="k-means++", linkage="ward", ep
         centroids_8d = np.array(centroids_8d)
 
         explanation = (
-            f"🌿 Hierarchical: Gom cụm thứ bậc dạng cây ({linkage}) thành {k} nhóm. "
-            "Liên kết phản ánh mối quan hệ họ hàng giữa các phong cách nhạc."
+            f"🌿 Hierarchical: Built agglomerative tree ({linkage} linkage) with {k} clusters "
+            "capturing musical genre proximity."
         )
 
     elif algorithm == "dbscan":
@@ -190,8 +194,8 @@ def run_clustering(algorithm="kmeans", k=4, init="k-means++", linkage="ward", ep
         centroids_8d = np.array(centroids_8d) if len(centroids_8d) > 0 else np.zeros((0, X.shape[1]))
 
         explanation = (
-            f"⁘ DBSCAN: Tìm thấy {n_clusters} cụm mật độ tự nhiên (ε={eps:.2f}, MinPts={min_samples}) "
-            f"và {n_noise} bài ngoại lai (Noise). Nhạc cổ điển tĩnh lặng/ambient tự động được xếp vào ngoại lai."
+            f"⁘ DBSCAN: Discovered {n_clusters} natural density clusters (ε={eps:.2f}, MinPts={min_samples}) "
+            f"with {n_noise} noise outliers."
         )
 
     else:
@@ -231,6 +235,7 @@ def get_recommendations(seed_id, labels, metric="cosine", top_n=5, filter_cluste
         scaler_scale = np.array(DATASET_PAYLOAD["scaler_scale"])
         seed_raw = np.array(custom_features, dtype=float)
         seed_vec = (seed_raw - scaler_mean) / scaler_scale
+        seed_pca = PCA_MODEL.transform(seed_vec.reshape(1, -1))[0]
         seed_song = {
             "id": "custom",
             "title": "Custom Tuned Track",
@@ -247,6 +252,8 @@ def get_recommendations(seed_id, labels, metric="cosine", top_n=5, filter_cluste
             "loudness": float(seed_raw[7]),
             "popularity": 99,
             "curated": False,
+            "pca_x": round(float(seed_pca[0]), 4),
+            "pca_y": round(float(seed_pca[1]), 4),
             "feature_vector": seed_vec.tolist()
         }
         seed_idx = -1
@@ -290,7 +297,7 @@ def get_recommendations(seed_id, labels, metric="cosine", top_n=5, filter_cluste
             match_pct = max(0.0, min(100.0, round((1.0 - (d / (max_dist + 1e-5))) * 100.0, 1)))
 
         # Reason for recommendation
-        reason = f"Cùng cụm #{c_id + 1} • {target['genre']} • {target['tempo']:.0f} BPM" if c_id == seed_cluster and c_id != -1 else f"Tương đồng đặc trưng • {target['tempo']:.0f} BPM"
+        reason = f"Same cluster #{c_id + 1} • {target['genre']} • {target['tempo']:.0f} BPM" if c_id == seed_cluster and c_id != -1 else f"Acoustic similarity • {target['genre']} • {target['tempo']:.0f} BPM"
 
         recommendations.append({
             "rank": rank,
@@ -316,7 +323,7 @@ def get_recommendations(seed_id, labels, metric="cosine", top_n=5, filter_cluste
 
     # Radar Comparison Payload (6 key normalized radar dimensions)
     # Dimensions: [Danceability, Energy, Valence, Acousticness, Instrumentalness, Speechiness]
-    radar_labels = ["Vũ đạo", "Năng lượng", "Tươi vui", "Mộc", "Nhạc cụ", "Lời hát"]
+    radar_labels = ["Danceability", "Energy", "Valence", "Acousticness", "Instrumentalness", "Speechiness"]
     seed_radar = [
         round(seed_song["danceability"], 3),
         round(seed_song["energy"], 3),

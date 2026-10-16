@@ -1,7 +1,8 @@
 /**
  * Spotify Song Recommendation Studio - Client Controller
  * HK261 Intelligent Systems - Chapter 6 Application
- * Features: 2D Audio Feature Space Canvas, Radar Spider Visualizer, Interactive Clustering & Nearest Neighbor
+ * Algorithms: K-Means, Agglomerative Hierarchical, DBSCAN
+ * Visualizations: 2D Audio Feature Space (PCA), Radar Chart, Cluster Validation Curves
  */
 
 (function () {
@@ -26,7 +27,10 @@
         seedSong: null,
         recommendations: [],
         radar: null,
-        clusterColors: [],
+        clusterColors: [
+            "#1DB954", "#38BDF8", "#F43F5E", "#F59E0B",
+            "#A855F7", "#EC4899", "#06B6D4", "#10B981"
+        ],
         hoveredPoint: null,
         animFrameId: null,
         pulseAngle: 0,
@@ -35,14 +39,13 @@
 
     // DOM Elements
     const elements = {
-        // Dropdown & Banner
+        // Step 1: Seed Selection
         songSelect: document.getElementById("songSelect"),
         randomSongBtn: document.getElementById("randomSongBtn"),
         bannerTitle: document.getElementById("bannerTitle"),
         bannerArtist: document.getElementById("bannerArtist"),
         bannerGenre: document.getElementById("bannerGenre"),
         bannerTempo: document.getElementById("bannerTempo"),
-        samplesScroll: document.getElementById("samplesScroll"),
 
         // Custom Tuning
         customTuningToggle: document.getElementById("customTuningToggle"),
@@ -58,7 +61,7 @@
         sliderAcousticVal: document.getElementById("sliderAcousticVal"),
         applyCustomBtn: document.getElementById("applyCustomBtn"),
 
-        // Algorithm Controls
+        // Step 2: Algorithm Controls
         algoTabs: document.querySelectorAll(".tab-btn"),
         kmeansControls: document.getElementById("kmeansControls"),
         hierarchicalControls: document.getElementById("hierarchicalControls"),
@@ -77,21 +80,23 @@
         minPtsSlider: document.getElementById("minPtsSlider"),
         minPtsVal: document.getElementById("minPtsVal"),
 
-        // Recommendation Settings
+        // Step 3: Recommendation Settings
         metricBtns: document.querySelectorAll("[data-metric]"),
         filterClusterCheckbox: document.getElementById("filterClusterCheckbox"),
         topNSlider: document.getElementById("topNSlider"),
         topNVal: document.getElementById("topNVal"),
+
+        // Action: Validation Curves Button
+        openCurveBtn: document.getElementById("openCurveBtn"),
 
         // KPI Badges
         metricClusters: document.getElementById("metricClusters"),
         metricSilhouette: document.getElementById("metricSilhouette"),
         metricSilBadge: document.getElementById("metricSilBadge"),
         metricInertia: document.getElementById("metricInertia"),
-        metricDB: document.getElementById("metricDB"),
         metricNoise: document.getElementById("metricNoise"),
 
-        // Canvas & Tooltip
+        // 2D Canvas & Tooltip
         audioSpaceCanvas: document.getElementById("audioSpaceCanvas"),
         canvasTooltip: document.getElementById("canvasTooltip"),
         canvasLegend: document.getElementById("canvasLegend"),
@@ -119,10 +124,8 @@
         // Pedagogical Insight
         explanationText: document.getElementById("explanationText"),
 
-        // Modal
+        // Validation Modal
         curveModal: document.getElementById("curveModal"),
-        openCurveBtnHeader: document.getElementById("openCurveBtnHeader"),
-        openCurveBtnSidebar: document.getElementById("openCurveBtnSidebar"),
         closeCurveBtn: document.getElementById("closeCurveBtn"),
         elbowChartCanvas: document.getElementById("elbowChart"),
         silhouetteChartCanvas: document.getElementById("silhouetteChart"),
@@ -142,7 +145,9 @@
             state.seedSong = window.INITIAL_DATA.seed_song || null;
             state.recommendations = window.INITIAL_DATA.recommendations || [];
             state.radar = window.INITIAL_DATA.radar || null;
-            state.clusterColors = window.INITIAL_DATA.cluster_colors || [];
+            if (window.INITIAL_DATA.cluster_colors && window.INITIAL_DATA.cluster_colors.length > 0) {
+                state.clusterColors = window.INITIAL_DATA.cluster_colors;
+            }
 
             if (state.seedSong) {
                 state.seedId = state.seedSong.id;
@@ -150,7 +155,6 @@
         }
 
         setupEventListeners();
-        setupCanvasHighDPI();
         renderLegend();
         renderCanvas();
         renderRadarChart();
@@ -158,21 +162,77 @@
         updateSilhouetteStatus(state.metrics.silhouette);
     }
 
-    // High-DPI Canvas Setup
-    function setupCanvasHighDPI() {
-        const canvas = elements.audioSpaceCanvas;
-        if (!canvas) return;
-        const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
+    // Dynamic Coordinate Bounds (ensures no song or centroid is clipped)
+    function getCanvasBounds() {
+        let minX = -8.0, maxX = 3.0, minY = -2.8, maxY = 3.2;
 
-        canvas.width = rect.width * dpr;
-        canvas.height = (rect.height || 420) * dpr;
+        if (state.points && state.points.length > 0) {
+            let pMinX = Infinity, pMaxX = -Infinity, pMinY = Infinity, pMaxY = -Infinity;
 
-        const ctx = canvas.getContext("2d");
-        ctx.scale(dpr, dpr);
+            for (let i = 0; i < state.points.length; i++) {
+                const pt = state.points[i];
+                if (pt.x < pMinX) pMinX = pt.x;
+                if (pt.x > pMaxX) pMaxX = pt.x;
+                if (pt.y < pMinY) pMinY = pt.y;
+                if (pt.y > pMaxY) pMaxY = pt.y;
+            }
+
+            if (state.seedSong && typeof state.seedSong.pca_x === "number") {
+                if (state.seedSong.pca_x < pMinX) pMinX = state.seedSong.pca_x;
+                if (state.seedSong.pca_x > pMaxX) pMaxX = state.seedSong.pca_x;
+                if (state.seedSong.pca_y < pMinY) pMinY = state.seedSong.pca_y;
+                if (state.seedSong.pca_y > pMaxY) pMaxY = state.seedSong.pca_y;
+            }
+
+            if (state.centroids && state.centroids.length > 0) {
+                state.centroids.forEach(c => {
+                    if (c && c.length >= 2) {
+                        if (c[0] < pMinX) pMinX = c[0];
+                        if (c[0] > pMaxX) pMaxX = c[0];
+                        if (c[1] < pMinY) pMinY = c[1];
+                        if (c[1] > pMaxY) pMaxY = c[1];
+                    }
+                });
+            }
+
+            const spanX = (pMaxX - pMinX) || 1.0;
+            const spanY = (pMaxY - pMinY) || 1.0;
+            minX = pMinX - spanX * 0.08;
+            maxX = pMaxX + spanX * 0.08;
+            minY = pMinY - spanY * 0.08;
+            maxY = pMaxY + spanY * 0.08;
+        }
+
+        return { minX, maxX, minY, maxY };
     }
 
-    // Legend Generator
+    // Coordinate Mapping (2D PCA -> Logical CSS Pixels)
+    function mapCoords(x, y, width, height, bounds) {
+        const padX = 42;
+        const padY = 36;
+        const px = padX + ((x - bounds.minX) / (bounds.maxX - bounds.minX)) * (width - 2 * padX);
+        const py = height - (padY + ((y - bounds.minY) / (bounds.maxY - bounds.minY)) * (height - 2 * padY));
+        return { px, py };
+    }
+
+    // Synchronize High-DPI Canvas Buffer with Element Size
+    function syncCanvasDPI(canvas) {
+        if (!canvas) return { width: 800, height: 420, dpr: 1 };
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        const width = Math.max(300, Math.round(rect.width || canvas.clientWidth || 800));
+        const height = Math.max(250, Math.round(rect.height || canvas.clientHeight || 420));
+        const bufW = Math.round(width * dpr);
+        const bufH = Math.round(height * dpr);
+
+        if (canvas.width !== bufW || canvas.height !== bufH) {
+            canvas.width = bufW;
+            canvas.height = bufH;
+        }
+        return { width, height, dpr };
+    }
+
+    // Dynamic Cluster Color Legend
     function renderLegend() {
         if (!elements.canvasLegend) return;
         const nClusters = state.metrics.n_clusters || state.k;
@@ -198,27 +258,12 @@
             html += `
                 <div class="legend-item">
                     <span class="legend-dot" style="background-color: #64748B"></span>
-                    <span>Noise / Outlier Tracks</span>
+                    <span>Noise / Outliers</span>
                 </div>
             `;
         }
 
         elements.canvasLegend.innerHTML = html;
-    }
-
-    // Coordinate Mapping (2D PCA Coordinates -> Canvas Pixels)
-    function mapCoords(x, y, width, height) {
-        // Bounds for 2D PCA in standard dataset: roughly [-3.5, 3.5]
-        const padX = 50;
-        const padY = 40;
-        const minX = -3.8;
-        const maxX = 3.8;
-        const minY = -2.8;
-        const maxY = 2.8;
-
-        const px = padX + ((x - minX) / (maxX - minX)) * (width - 2 * padX);
-        const py = height - (padY + ((y - minY) / (maxY - minY)) * (height - 2 * padY));
-        return { px, py };
     }
 
     // Animation Loop for Pulsing Glow on Active Seed Song
@@ -234,19 +279,24 @@
     // Main 2D Canvas Renderer
     function renderCanvas() {
         const canvas = elements.audioSpaceCanvas;
-        const dpr = window.devicePixelRatio || 1;
-        const width = canvas.width / dpr;
-        const height = canvas.height / dpr;
+        if (!canvas) return;
+
+        const { width, height, dpr } = syncCanvasDPI(canvas);
         const ctx = canvas.getContext("2d");
 
-        // Clear Background
-        ctx.fillStyle = "#080C14";
+        ctx.save();
+        ctx.scale(dpr, dpr);
+
+        const bounds = getCanvasBounds();
+
+        // 1. Clear Background
+        ctx.fillStyle = "#070B12";
         ctx.fillRect(0, 0, width, height);
 
-        // Subtle Background Grid Lines
-        ctx.strokeStyle = "rgba(34, 48, 74, 0.4)";
+        // 2. Subtle Background Grid Lines
+        ctx.strokeStyle = "rgba(27, 41, 69, 0.4)";
         ctx.lineWidth = 1;
-        const gridStep = 40;
+        const gridStep = 45;
         for (let x = gridStep; x < width; x += gridStep) {
             ctx.beginPath();
             ctx.moveTo(x, 0);
@@ -260,50 +310,52 @@
             ctx.stroke();
         }
 
-        // Draw Origin Crosshair
-        const origin = mapCoords(0, 0, width, height);
-        ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(origin.px, 0);
-        ctx.lineTo(origin.px, height);
-        ctx.moveTo(0, origin.py);
-        ctx.lineTo(width, origin.py);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Active Seed Song Coordinates
-        let seedCoords = null;
-        if (state.seedSong) {
-            seedCoords = mapCoords(state.seedSong.pca_x, state.seedSong.pca_y, width, height);
+        // 3. Origin Crosshair (0, 0 in PCA space)
+        if (bounds.minX <= 0 && bounds.maxX >= 0 && bounds.minY <= 0 && bounds.maxY >= 0) {
+            const origin = mapCoords(0, 0, width, height, bounds);
+            ctx.strokeStyle = "rgba(56, 189, 248, 0.22)";
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(origin.px, 0);
+            ctx.lineTo(origin.px, height);
+            ctx.moveTo(0, origin.py);
+            ctx.lineTo(width, origin.py);
+            ctx.stroke();
+            ctx.setLineDash([]);
         }
 
-        // Draw Connecting Rays from Seed Track to Top Recommendations
+        // 4. Coordinates for Active Seed Song
+        let seedCoords = null;
+        if (state.seedSong && typeof state.seedSong.pca_x === "number") {
+            seedCoords = mapCoords(state.seedSong.pca_x, state.seedSong.pca_y, width, height, bounds);
+        }
+
+        // 5. Draw Connecting Rays from Seed Track to Top Recommendations
         if (seedCoords && state.recommendations && state.recommendations.length > 0) {
             state.recommendations.forEach((rec, idx) => {
-                const recCoords = mapCoords(rec.pca_x, rec.pca_y, width, height);
+                if (typeof rec.pca_x !== "number") return;
+                const recCoords = mapCoords(rec.pca_x, rec.pca_y, width, height, bounds);
 
-                // Gradient ray
                 const grad = ctx.createLinearGradient(seedCoords.px, seedCoords.py, recCoords.px, recCoords.py);
-                grad.addColorStop(0, "rgba(29, 185, 84, 0.7)");
-                grad.addColorStop(1, "rgba(56, 189, 248, 0.3)");
+                grad.addColorStop(0, "rgba(29, 185, 84, 0.75)");
+                grad.addColorStop(1, "rgba(56, 189, 248, 0.35)");
 
                 ctx.strokeStyle = grad;
-                ctx.lineWidth = Math.max(1, 3.0 - idx * 0.4);
-                ctx.setLineDash([6, 3]);
+                ctx.lineWidth = Math.max(1.2, 2.8 - idx * 0.35);
+                ctx.setLineDash([5, 3]);
                 ctx.beginPath();
                 ctx.moveTo(seedCoords.px, seedCoords.py);
                 ctx.lineTo(recCoords.px, recCoords.py);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // Draw distance pill label on ray midpoint
+                // Midpoint Rank Badge
                 const midX = (seedCoords.px + recCoords.px) / 2;
                 const midY = (seedCoords.py + recCoords.py) / 2;
-                ctx.fillStyle = "rgba(11, 15, 23, 0.85)";
-                ctx.fillRect(midX - 16, midY - 8, 32, 16);
-                ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
-                ctx.strokeRect(midX - 16, midY - 8, 32, 16);
+                ctx.fillStyle = "rgba(13, 20, 36, 0.88)";
+                ctx.fillRect(midX - 14, midY - 8, 28, 16);
+                ctx.strokeStyle = "rgba(56, 189, 248, 0.55)";
+                ctx.strokeRect(midX - 14, midY - 8, 28, 16);
                 ctx.fillStyle = "#38BDF8";
                 ctx.font = "9px 'JetBrains Mono', monospace";
                 ctx.textAlign = "center";
@@ -312,10 +364,11 @@
             });
         }
 
-        // Draw Centroids
+        // 6. Draw Centroids
         if (state.centroids && state.centroids.length > 0) {
             state.centroids.forEach((c, idx) => {
-                const cPos = mapCoords(c[0], c[1], width, height);
+                if (!c || c.length < 2) return;
+                const cPos = mapCoords(c[0], c[1], width, height, bounds);
                 const color = state.clusterColors[idx % state.clusterColors.length] || "#1DB954";
 
                 // Centroid outer halo
@@ -327,44 +380,45 @@
 
                 // Crosshair
                 ctx.beginPath();
-                ctx.moveTo(cPos.px - 17, cPos.py);
-                ctx.lineTo(cPos.px + 17, cPos.py);
-                ctx.moveTo(cPos.px, cPos.py - 17);
-                ctx.lineTo(cPos.px, cPos.py + 17);
+                ctx.moveTo(cPos.px - 16, cPos.py);
+                ctx.lineTo(cPos.px + 16, cPos.py);
+                ctx.moveTo(cPos.px, cPos.py - 16);
+                ctx.lineTo(cPos.px, cPos.py + 16);
                 ctx.stroke();
 
-                // Centroid badge label
+                // Center Dot
                 ctx.fillStyle = color;
                 ctx.beginPath();
-                ctx.arc(cPos.px, cPos.py, 5, 0, Math.PI * 2);
+                ctx.arc(cPos.px, cPos.py, 4.5, 0, Math.PI * 2);
                 ctx.fill();
 
+                // Label
                 ctx.fillStyle = "#F8FAFC";
                 ctx.font = "bold 9px 'Plus Jakarta Sans', sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(`C${idx + 1}`, cPos.px, cPos.py - 18);
+                ctx.fillText(`C${idx + 1}`, cPos.px, cPos.py - 17);
             });
         }
 
-        // Draw Song Points
+        // 7. Draw Song Points
         state.points.forEach((p) => {
-            const pos = mapCoords(p.x, p.y, width, height);
+            const pos = mapCoords(p.x, p.y, width, height, bounds);
             const isHovered = state.hoveredPoint && state.hoveredPoint.id === p.id;
             const isSeed = state.seedSong && state.seedSong.id === p.id;
 
-            let radius = isHovered ? 7 : (p.type === "noise" ? 3.5 : 4.5);
-            let color = p.color;
+            let radius = isHovered ? 7.5 : (p.type === "noise" ? 3.5 : 4.5);
+            let color = p.color || "#1DB954";
 
             // Highlight if point is one of the recommendations
             const isRec = state.recommendations.some(r => r.id === p.id);
             if (isRec) {
-                radius = isHovered ? 8 : 6.5;
+                radius = isHovered ? 8.5 : 6.5;
             }
 
             // Glow around point
             if (isHovered || isRec) {
                 ctx.fillStyle = color;
-                ctx.globalAlpha = 0.3;
+                ctx.globalAlpha = 0.35;
                 ctx.beginPath();
                 ctx.arc(pos.px, pos.py, radius + 4, 0, Math.PI * 2);
                 ctx.fill();
@@ -383,7 +437,7 @@
             ctx.stroke();
         });
 
-        // Draw Active Seed Song Pulse Indicator
+        // 8. Draw Active Seed Song Pulse Indicator
         if (seedCoords) {
             const pulseRadius = 14 + Math.sin(state.pulseAngle) * 4;
             const pulseAlpha = 0.4 + Math.sin(state.pulseAngle) * 0.25;
@@ -411,6 +465,8 @@
             ctx.textAlign = "center";
             ctx.fillText("★ SEED", seedCoords.px, seedCoords.py - 18);
         }
+
+        ctx.restore();
     }
 
     // Custom Lightweight Radar Spider Chart
@@ -431,7 +487,7 @@
 
         const centerX = width / 2;
         const centerY = height / 2 + 10;
-        const radius = 70;
+        const radius = 68;
 
         const radarData = state.radar || {
             labels: ["Dance", "Energy", "Valence", "Acoustic", "Instrumental", "Speech"],
@@ -446,7 +502,7 @@
         const levels = 4;
         for (let l = 1; l <= levels; l++) {
             const levelRadius = (radius / levels) * l;
-            ctx.strokeStyle = "rgba(34, 48, 74, 0.6)";
+            ctx.strokeStyle = "rgba(27, 41, 69, 0.6)";
             ctx.lineWidth = 1;
             ctx.beginPath();
             for (let i = 0; i < numAxes; i++) {
@@ -460,8 +516,8 @@
             ctx.stroke();
         }
 
-        // Draw Axis Rays & Labels
-        ctx.font = "10px 'Plus Jakarta Sans', sans-serif";
+        // Draw Radial Spokes & Dimension Labels
+        ctx.font = "9.5px 'Plus Jakarta Sans', sans-serif";
         ctx.fillStyle = "#94A3B8";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -471,21 +527,22 @@
             const x = centerX + Math.cos(angle) * radius;
             const y = centerY + Math.sin(angle) * radius;
 
-            ctx.strokeStyle = "rgba(51, 69, 102, 0.5)";
+            ctx.strokeStyle = "rgba(27, 41, 69, 0.7)";
+            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.lineTo(x, y);
             ctx.stroke();
 
-            // Label position slightly outside
+            // Label position with offset
             const labelX = centerX + Math.cos(angle) * (radius + 18);
-            const labelY = centerY + Math.sin(angle) * (radius + 14);
+            const labelY = centerY + Math.sin(angle) * (radius + 18);
             ctx.fillText(radarData.labels[i], labelX, labelY);
         }
 
-        // Draw Recommended Song Polygon (Sky Blue)
+        // Draw Top Match Recommendation Polygon (Sky Blue)
         if (radarData.rec_values && radarData.rec_values.length === numAxes) {
-            ctx.fillStyle = "rgba(56, 189, 248, 0.25)";
+            ctx.fillStyle = "rgba(56, 189, 248, 0.22)";
             ctx.strokeStyle = "#38BDF8";
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -522,38 +579,59 @@
         }
     }
 
-    // Silhouette Status Evaluation Tag
+    // Silhouette Status Evaluation Badge
     function updateSilhouetteStatus(score) {
         if (!elements.metricSilBadge) return;
         if (score === "N/A" || score === null || score === undefined) {
-            elements.metricSilBadge.textContent = "Chưa đủ cụm";
+            elements.metricSilBadge.textContent = "N/A";
             elements.metricSilBadge.style.color = "#64748B";
             return;
         }
         const s = parseFloat(score);
         if (s >= 0.35) {
-            elements.metricSilBadge.textContent = "✨ Phân tách rất tốt";
+            elements.metricSilBadge.textContent = "✨ Strong Structure";
             elements.metricSilBadge.style.color = "#1DB954";
         } else if (s >= 0.20) {
-            elements.metricSilBadge.textContent = "✨ Cụm hợp lý";
+            elements.metricSilBadge.textContent = "✨ Reasonable";
             elements.metricSilBadge.style.color = "#38BDF8";
         } else if (s >= 0.05) {
-            elements.metricSilBadge.textContent = "⚡ Có giao thoa nhẹ";
+            elements.metricSilBadge.textContent = "⚡ Overlapping";
             elements.metricSilBadge.style.color = "#F59E0B";
         } else {
-            elements.metricSilBadge.textContent = "⚠️ Cụm phân tán";
+            elements.metricSilBadge.textContent = "⚠️ Dispersed";
             elements.metricSilBadge.style.color = "#F43F5E";
         }
     }
 
-    // Update UI Elements with Latest State
+    // Update Seed Track Banner and Profile Card
+    function updateSeedBanner(seed) {
+        if (!seed) return;
+        if (elements.bannerTitle) elements.bannerTitle.textContent = seed.title;
+        if (elements.bannerArtist) elements.bannerArtist.textContent = `${seed.artist} (${seed.year || 2024})`;
+        if (elements.bannerGenre) elements.bannerGenre.textContent = `🏷️ ${seed.genre}`;
+        if (elements.bannerTempo) elements.bannerTempo.textContent = `🥁 ${seed.tempo} BPM`;
+
+        // Profile Card
+        if (elements.profileSeedTitle) elements.profileSeedTitle.textContent = seed.title;
+        if (elements.profileSeedArtist) elements.profileSeedArtist.textContent = seed.artist;
+        if (elements.barSeedDance) elements.barSeedDance.style.width = `${seed.danceability * 100}%`;
+        if (elements.valSeedDance) elements.valSeedDance.textContent = seed.danceability;
+        if (elements.barSeedEnergy) elements.barSeedEnergy.style.width = `${seed.energy * 100}%`;
+        if (elements.valSeedEnergy) elements.valSeedEnergy.textContent = seed.energy;
+        if (elements.barSeedValence) elements.barSeedValence.style.width = `${seed.valence * 100}%`;
+        if (elements.valSeedValence) elements.valSeedValence.textContent = seed.valence;
+        if (elements.barSeedAcoustic) elements.barSeedAcoustic.style.width = `${seed.acousticness * 100}%`;
+        if (elements.valSeedAcoustic) elements.valSeedAcoustic.textContent = seed.acousticness;
+    }
+
+    // Update UI Elements with Latest Server Response State
     function updateUI(data) {
         if (data.metrics) {
             state.metrics = data.metrics;
-            elements.metricClusters.textContent = data.metrics.n_clusters;
-            elements.metricSilhouette.textContent = data.metrics.silhouette;
-            elements.metricInertia.textContent = data.metrics.inertia;
-            elements.metricNoise.textContent = data.metrics.n_noise;
+            if (elements.metricClusters) elements.metricClusters.textContent = data.metrics.n_clusters;
+            if (elements.metricSilhouette) elements.metricSilhouette.textContent = data.metrics.silhouette;
+            if (elements.metricInertia) elements.metricInertia.textContent = data.metrics.inertia;
+            if (elements.metricNoise) elements.metricNoise.textContent = data.metrics.n_noise;
             updateSilhouetteStatus(data.metrics.silhouette);
         }
 
@@ -563,43 +641,21 @@
         if (data.recommendations) state.recommendations = data.recommendations;
         if (data.radar) state.radar = data.radar;
 
-        // Update Seed Track Banner
+        // Update Seed Track Banner & Profile
         if (state.seedSong) {
-            elements.bannerTitle.textContent = state.seedSong.title;
-            elements.bannerArtist.textContent = `${state.seedSong.artist} (${state.seedSong.year})`;
-            elements.bannerGenre.textContent = `🏷️ ${state.seedSong.genre}`;
-            elements.bannerTempo.textContent = `🥁 ${state.seedSong.tempo} BPM`;
+            updateSeedBanner(state.seedSong);
 
-            // Profile Card
-            elements.profileSeedTitle.textContent = state.seedSong.title;
-            elements.profileSeedArtist.textContent = state.seedSong.artist;
-            elements.barSeedDance.style.width = `${state.seedSong.danceability * 100}%`;
-            elements.valSeedDance.textContent = state.seedSong.danceability;
-            elements.barSeedEnergy.style.width = `${state.seedSong.energy * 100}%`;
-            elements.valSeedEnergy.textContent = state.seedSong.energy;
-            elements.barSeedValence.style.width = `${state.seedSong.valence * 100}%`;
-            elements.valSeedValence.textContent = state.seedSong.valence;
-            elements.barSeedAcoustic.style.width = `${state.seedSong.acousticness * 100}%`;
-            elements.valSeedAcoustic.textContent = state.seedSong.acousticness;
-
-            // Update dropdown selection
             if (elements.songSelect && state.seedSong.id !== "custom") {
                 elements.songSelect.value = state.seedSong.id;
             }
-
-            // Sync quick sample chips
-            document.querySelectorAll(".sample-chip").forEach(chip => {
-                if (chip.getAttribute("data-song-id") === state.seedSong.id) {
-                    chip.classList.add("active");
-                } else {
-                    chip.classList.remove("active");
-                }
-            });
         }
 
-        // Update Recommendations Deck (Playlist rows)
-        if (state.recommendations) {
-            elements.recCountBadge.textContent = `Top ${state.recommendations.length}`;
+        // Update Recommendations Table
+        if (state.recommendations && elements.recsGrid) {
+            if (elements.recCountBadge) {
+                elements.recCountBadge.textContent = `Top ${state.recommendations.length}`;
+            }
+
             let recsHtml = "";
             state.recommendations.forEach(rec => {
                 recsHtml += `
@@ -619,15 +675,15 @@
                             </div>
                             <span class="match-text">${rec.match_percentage}%</span>
                         </div>
-                        <button class="btn-play-seed" data-song-id="${rec.id}" title="Chọn bài này làm Seed">
-                            ▶ Chọn
+                        <button class="btn-play-seed" data-song-id="${rec.id}" title="Select as Seed Track">
+                            ▶ Select
                         </button>
                     </div>
                 `;
             });
             elements.recsGrid.innerHTML = recsHtml;
 
-            // Attach listeners to "Chọn" buttons
+            // Attach listeners to "Select" buttons in table
             document.querySelectorAll(".btn-play-seed").forEach(btn => {
                 btn.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -639,15 +695,15 @@
 
         // Update Radar Legends
         if (state.radar) {
-            elements.radarSeedLegend.textContent = state.radar.seed_title || "Seed";
-            elements.radarRecLegend.textContent = state.radar.rec_title || "Top Match";
+            if (elements.radarSeedLegend) elements.radarSeedLegend.textContent = state.radar.seed_title || "Seed";
+            if (elements.radarRecLegend) elements.radarRecLegend.textContent = state.radar.rec_title || "Top Match";
         }
 
         // Update Latency & Insight
-        if (data.metrics && data.metrics.inference_time_ms !== undefined) {
-            elements.recLatency.textContent = `Độ trễ: ~${data.metrics.inference_time_ms} ms`;
+        if (data.metrics && data.metrics.inference_time_ms !== undefined && elements.recLatency) {
+            elements.recLatency.textContent = `Latency: ~${data.metrics.inference_time_ms} ms`;
         }
-        if (data.explanation) {
+        if (data.explanation && elements.explanationText) {
             elements.explanationText.textContent = data.explanation;
         }
 
@@ -688,40 +744,59 @@
         .catch(err => console.error("Cluster API network error:", err));
     }
 
-    // Select a New Seed Song
+    // Select a New Seed Song with Instant Reactive Visual Feedback
     function selectSeedSong(songId) {
         state.seedId = songId;
         state.customFeatures = null;
+
+        // Immediate local lookup for instantaneous visual update on the graph!
+        const found = state.points.find(p => p.id === songId);
+        if (found) {
+            state.seedSong = {
+                id: found.id,
+                title: found.title,
+                artist: found.artist,
+                genre: found.genre,
+                year: found.year,
+                tempo: found.tempo,
+                danceability: found.danceability,
+                energy: found.energy,
+                valence: found.valence || 0.5,
+                acousticness: found.acousticness || 0.2,
+                pca_x: found.x,
+                pca_y: found.y
+            };
+            if (elements.songSelect && elements.songSelect.value !== songId) {
+                elements.songSelect.value = songId;
+            }
+            updateSeedBanner(state.seedSong);
+            renderCanvas();
+        }
+
         triggerClusterUpdate();
     }
 
     // Setup All Event Listeners
     function setupEventListeners() {
         // 1. Dropdown Selection
-        elements.songSelect.addEventListener("change", (e) => {
-            selectSeedSong(e.target.value);
-        });
-
-        // 2. Random Seed Song Button
-        elements.randomSongBtn.addEventListener("click", () => {
-            const options = elements.songSelect.options;
-            const randomIndex = Math.floor(Math.random() * options.length);
-            elements.songSelect.selectedIndex = randomIndex;
-            selectSeedSong(options[randomIndex].value);
-        });
-
-        // 3. Curated Quick Sample Chips Ribbon (optional - may be hidden)
-        if (elements.samplesScroll) {
-            elements.samplesScroll.addEventListener("click", (e) => {
-                const chip = e.target.closest(".sample-chip");
-                if (chip) {
-                    const songId = chip.getAttribute("data-song-id");
-                    selectSeedSong(songId);
-                }
+        if (elements.songSelect) {
+            elements.songSelect.addEventListener("change", (e) => {
+                selectSeedSong(e.target.value);
             });
         }
 
-        // 4. Algorithm Tabs
+        // 2. Random Seed Song Button
+        if (elements.randomSongBtn && elements.songSelect) {
+            elements.randomSongBtn.addEventListener("click", () => {
+                const options = elements.songSelect.options;
+                if (!options || options.length === 0) return;
+                const randomIndex = Math.floor(Math.random() * options.length);
+                elements.songSelect.selectedIndex = randomIndex;
+                selectSeedSong(options[randomIndex].value);
+            });
+        }
+
+        // 3. Algorithm Tabs
         elements.algoTabs.forEach(tab => {
             tab.addEventListener("click", () => {
                 elements.algoTabs.forEach(t => t.classList.remove("active"));
@@ -729,20 +804,22 @@
                 state.algorithm = tab.getAttribute("data-algo");
 
                 // Toggle visibility
-                elements.kmeansControls.classList.toggle("hidden", state.algorithm !== "kmeans");
-                elements.hierarchicalControls.classList.toggle("hidden", state.algorithm !== "hierarchical");
-                elements.dbscanControls.classList.toggle("hidden", state.algorithm !== "dbscan");
+                if (elements.kmeansControls) elements.kmeansControls.classList.toggle("hidden", state.algorithm !== "kmeans");
+                if (elements.hierarchicalControls) elements.hierarchicalControls.classList.toggle("hidden", state.algorithm !== "hierarchical");
+                if (elements.dbscanControls) elements.dbscanControls.classList.toggle("hidden", state.algorithm !== "dbscan");
 
                 triggerClusterUpdate();
             });
         });
 
-        // 5. K-Means Sliders
-        elements.kSlider.addEventListener("input", (e) => {
-            state.k = parseInt(e.target.value);
-            elements.kVal.textContent = state.k;
-            debounce(triggerClusterUpdate, 200);
-        });
+        // 4. K-Means Sliders
+        if (elements.kSlider) {
+            elements.kSlider.addEventListener("input", (e) => {
+                state.k = parseInt(e.target.value);
+                if (elements.kVal) elements.kVal.textContent = state.k;
+                debounce(triggerClusterUpdate, 200);
+            });
+        }
 
         elements.initBtns.forEach(btn => {
             btn.addEventListener("click", () => {
@@ -753,32 +830,40 @@
             });
         });
 
-        // 6. Hierarchical Controls
-        elements.hierKSlider.addEventListener("input", (e) => {
-            state.k = parseInt(e.target.value);
-            elements.hierKVal.textContent = state.k;
-            debounce(triggerClusterUpdate, 200);
-        });
+        // 5. Hierarchical Controls
+        if (elements.hierKSlider) {
+            elements.hierKSlider.addEventListener("input", (e) => {
+                state.k = parseInt(e.target.value);
+                if (elements.hierKVal) elements.hierKVal.textContent = state.k;
+                debounce(triggerClusterUpdate, 200);
+            });
+        }
 
-        elements.linkageSelect.addEventListener("change", (e) => {
-            state.linkage = e.target.value;
-            triggerClusterUpdate();
-        });
+        if (elements.linkageSelect) {
+            elements.linkageSelect.addEventListener("change", (e) => {
+                state.linkage = e.target.value;
+                triggerClusterUpdate();
+            });
+        }
 
-        // 7. DBSCAN Controls
-        elements.epsSlider.addEventListener("input", (e) => {
-            state.eps = parseFloat(e.target.value);
-            elements.epsVal.textContent = state.eps.toFixed(2);
-            debounce(triggerClusterUpdate, 250);
-        });
+        // 6. DBSCAN Controls
+        if (elements.epsSlider) {
+            elements.epsSlider.addEventListener("input", (e) => {
+                state.eps = parseFloat(e.target.value);
+                if (elements.epsVal) elements.epsVal.textContent = state.eps.toFixed(2);
+                debounce(triggerClusterUpdate, 250);
+            });
+        }
 
-        elements.minPtsSlider.addEventListener("input", (e) => {
-            state.minSamples = parseInt(e.target.value);
-            elements.minPtsVal.textContent = state.minSamples;
-            debounce(triggerClusterUpdate, 250);
-        });
+        if (elements.minPtsSlider) {
+            elements.minPtsSlider.addEventListener("input", (e) => {
+                state.minSamples = parseInt(e.target.value);
+                if (elements.minPtsVal) elements.minPtsVal.textContent = state.minSamples;
+                debounce(triggerClusterUpdate, 250);
+            });
+        }
 
-        // 8. Distance Metric & Filter
+        // 7. Distance Metric & Filter
         elements.metricBtns.forEach(btn => {
             btn.addEventListener("click", () => {
                 elements.metricBtns.forEach(b => b.classList.remove("active"));
@@ -788,22 +873,28 @@
             });
         });
 
-        elements.filterClusterCheckbox.addEventListener("change", (e) => {
-            state.filterCluster = e.target.checked;
-            triggerClusterUpdate();
-        });
-
-        elements.topNSlider.addEventListener("input", (e) => {
-            state.topN = parseInt(e.target.value);
-            elements.topNVal.textContent = state.topN;
-            debounce(triggerClusterUpdate, 200);
-        });
-
-        // 9. Custom Audio Sliders
-        const updateSliderDisplay = (slider, display) => {
-            slider.addEventListener("input", (e) => {
-                display.textContent = e.target.value;
+        if (elements.filterClusterCheckbox) {
+            elements.filterClusterCheckbox.addEventListener("change", (e) => {
+                state.filterCluster = e.target.checked;
+                triggerClusterUpdate();
             });
+        }
+
+        if (elements.topNSlider) {
+            elements.topNSlider.addEventListener("input", (e) => {
+                state.topN = parseInt(e.target.value);
+                if (elements.topNVal) elements.topNVal.textContent = state.topN;
+                debounce(triggerClusterUpdate, 200);
+            });
+        }
+
+        // 8. Custom Audio Sliders
+        const updateSliderDisplay = (slider, display) => {
+            if (slider && display) {
+                slider.addEventListener("input", (e) => {
+                    display.textContent = e.target.value;
+                });
+            }
         };
         updateSliderDisplay(elements.sliderDance, elements.sliderDanceVal);
         updateSliderDisplay(elements.sliderEnergy, elements.sliderEnergyVal);
@@ -811,116 +902,123 @@
         updateSliderDisplay(elements.sliderTempo, elements.sliderTempoVal);
         updateSliderDisplay(elements.sliderAcoustic, elements.sliderAcousticVal);
 
-        elements.applyCustomBtn.addEventListener("click", () => {
-            state.customFeatures = [
-                parseFloat(elements.sliderDance.value),
-                parseFloat(elements.sliderEnergy.value),
-                parseFloat(elements.sliderValence.value),
-                parseFloat(elements.sliderTempo.value),
-                parseFloat(elements.sliderAcoustic.value),
-                0.0,   // instrumentalness
-                0.06,  // speechiness
-                -6.0   // loudness
-            ];
-            triggerClusterUpdate();
-        });
+        if (elements.applyCustomBtn) {
+            elements.applyCustomBtn.addEventListener("click", () => {
+                state.customFeatures = [
+                    parseFloat(elements.sliderDance.value),
+                    parseFloat(elements.sliderEnergy.value),
+                    parseFloat(elements.sliderValence.value),
+                    parseFloat(elements.sliderTempo.value),
+                    parseFloat(elements.sliderAcoustic.value),
+                    0.0,   // instrumentalness
+                    0.06,  // speechiness
+                    -6.0   // loudness
+                ];
+                triggerClusterUpdate();
+            });
+        }
 
-        // 10. Interactive Canvas Hover & Click
+        // 9. Interactive Canvas Hover & Click (Point Selection)
         const canvas = elements.audioSpaceCanvas;
-        canvas.addEventListener("mousemove", (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+        if (canvas) {
+            canvas.addEventListener("mousemove", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
 
-            const width = rect.width;
-            const height = rect.height;
+                const width = rect.width;
+                const height = rect.height;
+                const bounds = getCanvasBounds();
 
-            let closestPoint = null;
-            let minDist = 14; // hover hit radius
+                let closestPoint = null;
+                let minDist = 14;
 
-            state.points.forEach(p => {
-                const pos = mapCoords(p.x, p.y, width, height);
-                const dx = pos.px - mouseX;
-                const dy = pos.py - mouseY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < minDist) {
-                    minDist = dist;
-                    closestPoint = p;
+                state.points.forEach(p => {
+                    const pos = mapCoords(p.x, p.y, width, height, bounds);
+                    const dx = pos.px - mouseX;
+                    const dy = pos.py - mouseY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestPoint = p;
+                    }
+                });
+
+                state.hoveredPoint = closestPoint;
+
+                if (closestPoint && elements.canvasTooltip) {
+                    elements.canvasTooltip.style.display = "block";
+                    elements.canvasTooltip.style.left = `${mouseX + 15}px`;
+                    elements.canvasTooltip.style.top = `${mouseY - 20}px`;
+
+                    const moodName = closestPoint.cluster === -1 ? "Noise / Outlier" : `Cluster #${closestPoint.cluster + 1}`;
+                    elements.canvasTooltip.innerHTML = `
+                        <div class="tooltip-title">${closestPoint.title}</div>
+                        <div class="tooltip-artist">${closestPoint.artist} • ${closestPoint.genre}</div>
+                        <div class="tooltip-metrics">
+                            <span class="tooltip-badge">🥁 ${closestPoint.tempo} BPM</span>
+                            <span class="tooltip-badge">⚡ ${closestPoint.energy} Energy</span>
+                            <span class="tooltip-badge">💃 ${closestPoint.danceability} Dance</span>
+                            <span class="tooltip-badge" style="color:${closestPoint.color}">${moodName}</span>
+                        </div>
+                    `;
+                } else if (elements.canvasTooltip) {
+                    elements.canvasTooltip.style.display = "none";
                 }
             });
 
-            state.hoveredPoint = closestPoint;
+            canvas.addEventListener("mouseleave", () => {
+                state.hoveredPoint = null;
+                if (elements.canvasTooltip) elements.canvasTooltip.style.display = "none";
+            });
 
-            if (closestPoint) {
-                elements.canvasTooltip.style.display = "block";
-                elements.canvasTooltip.style.left = `${mouseX + 15}px`;
-                elements.canvasTooltip.style.top = `${mouseY - 20}px`;
+            canvas.addEventListener("click", () => {
+                if (state.hoveredPoint) {
+                    selectSeedSong(state.hoveredPoint.id);
+                }
+            });
+        }
 
-                const moodName = closestPoint.cluster === -1 ? "Noise / Outlier" : `Cluster #${closestPoint.cluster + 1}`;
-                elements.canvasTooltip.innerHTML = `
-                    <div class="tooltip-title">${closestPoint.title}</div>
-                    <div class="tooltip-artist">${closestPoint.artist} • ${closestPoint.genre}</div>
-                    <div class="tooltip-metrics">
-                        <span class="tooltip-badge">🥁 ${closestPoint.tempo} BPM</span>
-                        <span class="tooltip-badge">⚡ ${closestPoint.energy} Energy</span>
-                        <span class="tooltip-badge">💃 ${closestPoint.danceability} Dance</span>
-                        <span class="tooltip-badge" style="color:${closestPoint.color}">${moodName}</span>
-                    </div>
-                `;
-            } else {
-                elements.canvasTooltip.style.display = "none";
-            }
-        });
-
-        canvas.addEventListener("mouseleave", () => {
-            state.hoveredPoint = null;
-            elements.canvasTooltip.style.display = "none";
-        });
-
-        canvas.addEventListener("click", () => {
-            if (state.hoveredPoint) {
-                selectSeedSong(state.hoveredPoint.id);
-            }
-        });
-
-        // 11. Modal Triggers
+        // 10. Validation Curves Modal Triggers
         const openModal = () => {
-            elements.curveModal.classList.remove("hidden");
+            if (elements.curveModal) elements.curveModal.classList.remove("hidden");
             loadValidationCurves();
         };
 
         const closeModal = () => {
-            elements.curveModal.classList.add("hidden");
+            if (elements.curveModal) elements.curveModal.classList.add("hidden");
         };
 
-        elements.openCurveBtnHeader.addEventListener("click", openModal);
-        elements.openCurveBtnSidebar.addEventListener("click", openModal);
-        elements.closeCurveBtn.addEventListener("click", closeModal);
-        elements.curveModal.addEventListener("click", (e) => {
-            if (e.target === elements.curveModal) closeModal();
-        });
+        if (elements.openCurveBtn) elements.openCurveBtn.addEventListener("click", openModal);
+        if (elements.closeCurveBtn) elements.closeCurveBtn.addEventListener("click", closeModal);
+        if (elements.curveModal) {
+            elements.curveModal.addEventListener("click", (e) => {
+                if (e.target === elements.curveModal) closeModal();
+            });
+        }
 
-        // Window resize responsive redraw
+        // Responsive window redraw
         window.addEventListener("resize", () => {
-            setupCanvasHighDPI();
             renderCanvas();
         });
     }
 
-    // Debounce helper
+    // Debounce Helper
     function debounce(func, wait) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(func, wait);
     }
 
-    // Load and Render Validation Curves (Elbow & Silhouette)
+    // Load and Render Validation Curves (Elbow SSE & Silhouette)
     function loadValidationCurves() {
         if (state.validationCurves) {
             renderValidationCharts(state.validationCurves);
             return;
         }
 
-        elements.modalBestKText.textContent = "Đang chạy gom cụm K-Means với K từ 2 đến 8...";
+        if (elements.modalBestKText) {
+            elements.modalBestKText.textContent = "Running K-Means evaluation across K in [2, 8]...";
+        }
 
         fetch("/api/validation-curve", {
             method: "POST",
@@ -938,74 +1036,81 @@
     }
 
     function renderValidationCharts(data) {
-        elements.modalBestKText.innerHTML = `
-            Số cụm tối ưu được đề xuất là <strong>K = ${data.best_k}</strong> 
-            (Hệ số Silhouette đạt đỉnh: <strong>${Math.max(...data.silhouette_curve)}</strong>).
-        `;
+        if (elements.modalBestKText) {
+            const peakSil = Math.max(...data.silhouette_curve);
+            elements.modalBestKText.innerHTML = `
+                Recommended optimal clusters: <strong>K = ${data.best_k}</strong> 
+                (Peak Silhouette Score: <strong>${peakSil}</strong>).
+            `;
+        }
 
         // 1. Elbow Chart (Chart.js)
-        if (elbowChartInstance) elbowChartInstance.destroy();
-        const ctxElbow = elements.elbowChartCanvas.getContext("2d");
-        elbowChartInstance = new Chart(ctxElbow, {
-            type: "line",
-            data: {
-                labels: data.k_values.map(k => `K=${k}`),
-                datasets: [{
-                    label: "Inertia (SSE)",
-                    data: data.elbow_curve,
-                    borderColor: "#F59E0B",
-                    backgroundColor: "rgba(245, 158, 11, 0.15)",
-                    borderWidth: 2.5,
-                    pointBackgroundColor: "#F59E0B",
-                    pointRadius: 4,
-                    fill: true,
-                    tension: 0.25
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+        if (elements.elbowChartCanvas) {
+            if (elbowChartInstance) elbowChartInstance.destroy();
+            const ctxElbow = elements.elbowChartCanvas.getContext("2d");
+            elbowChartInstance = new Chart(ctxElbow, {
+                type: "line",
+                data: {
+                    labels: data.k_values.map(k => `K=${k}`),
+                    datasets: [{
+                        label: "Inertia (SSE)",
+                        data: data.elbow_curve,
+                        borderColor: "#F59E0B",
+                        backgroundColor: "rgba(245, 158, 11, 0.15)",
+                        borderWidth: 2.5,
+                        pointBackgroundColor: "#F59E0B",
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.25
+                    }]
                 },
-                scales: {
-                    x: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } },
-                    y: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } },
+                        y: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } }
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // 2. Silhouette Chart (Chart.js)
-        if (silChartInstance) silChartInstance.destroy();
-        const ctxSil = elements.silhouetteChartCanvas.getContext("2d");
-        silChartInstance = new Chart(ctxSil, {
-            type: "line",
-            data: {
-                labels: data.k_values.map(k => `K=${k}`),
-                datasets: [{
-                    label: "Silhouette Score",
-                    data: data.silhouette_curve,
-                    borderColor: "#38BDF8",
-                    backgroundColor: "rgba(56, 189, 248, 0.15)",
-                    borderWidth: 2.5,
-                    pointBackgroundColor: data.k_values.map(k => k === data.best_k ? "#1DB954" : "#38BDF8"),
-                    pointRadius: data.k_values.map(k => k === data.best_k ? 8 : 4),
-                    fill: true,
-                    tension: 0.25
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+        if (elements.silhouetteChartCanvas) {
+            if (silChartInstance) silChartInstance.destroy();
+            const ctxSil = elements.silhouetteChartCanvas.getContext("2d");
+            silChartInstance = new Chart(ctxSil, {
+                type: "line",
+                data: {
+                    labels: data.k_values.map(k => `K=${k}`),
+                    datasets: [{
+                        label: "Silhouette Score",
+                        data: data.silhouette_curve,
+                        borderColor: "#38BDF8",
+                        backgroundColor: "rgba(56, 189, 248, 0.15)",
+                        borderWidth: 2.5,
+                        pointBackgroundColor: data.k_values.map(k => k === data.best_k ? "#1DB954" : "#38BDF8"),
+                        pointRadius: data.k_values.map(k => k === data.best_k ? 8 : 4),
+                        fill: true,
+                        tension: 0.25
+                    }]
                 },
-                scales: {
-                    x: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } },
-                    y: { grid: { color: "rgba(34, 48, 74, 0.4)" }, ticks: { color: "#94A3B8" } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } },
+                        y: { grid: { color: "rgba(27, 41, 69, 0.5)" }, ticks: { color: "#94A3B8" } }
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     // Start on DOM Ready
@@ -1015,4 +1120,3 @@
         init();
     }
 })();
-

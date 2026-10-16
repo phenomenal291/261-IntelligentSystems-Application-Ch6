@@ -4,12 +4,12 @@
    ========================================================================== */
 
 :root {
-    --bg-main: #080C14;
-    --bg-card: #0F1726;
-    --bg-card-alt: #131E33;
-    --bg-elevated: #1A2844;
-    --border: #1E2D4A;
-    --border-hover: #2E436B;
+    --bg-main: #070B12;
+    --bg-card: #0D1424;
+    --bg-card-alt: #111A2E;
+    --bg-elevated: #17233D;
+    --border: #1B2945;
+    --border-hover: #293E66;
 
     --text-primary: #F8FAFC;
     --text-secondary: #94A3B8;
@@ -30,7 +30,7 @@
     --radius-lg: 14px;
     --radius-full: 9999px;
 
-    --shadow-card: 0 4px 14px 0 rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 4px 14px 0 rgba(0, 0, 0, 0.45);
     --shadow-glow: 0 0 16px rgba(29, 185, 84, 0.25);
 }
 
@@ -47,88 +47,32 @@ body {
     font-size: 13.5px;
     line-height: 1.45;
     min-height: 100vh;
-    padding: 12px 16px;
+    padding: 16px;
     overflow-x: hidden;
 }
 
 .app-container {
-    max-width: 1280px;
+    max-width: 1320px;
     margin: 0 auto;
 }
 
 /* ==========================================================================
-   Top Header (Minimalist)
+   Buttons & Micro-interactions
    ========================================================================== */
 
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 18px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 12px;
-    box-shadow: var(--shadow-card);
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.brand-title-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.app-header h1 {
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    color: var(--text-primary);
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.badge-tag {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: var(--radius-full);
-}
-
-.badge-tag.green {
-    background: rgba(29, 185, 84, 0.12);
-    color: var(--spotify-green);
-    border: 1px solid rgba(29, 185, 84, 0.3);
-}
-
-.badge-tag.outline {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-}
-
-/* Buttons */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 6px 12px;
-    font-size: 0.76rem;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
     font-weight: 600;
     border-radius: var(--radius-md);
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .btn-outline-green {
@@ -163,6 +107,26 @@ body {
     background: var(--border);
 }
 
+.btn-validation {
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    border-radius: var(--radius-md);
+    background: rgba(29, 185, 84, 0.08);
+    border: 1px solid rgba(29, 185, 84, 0.35);
+    color: var(--spotify-green);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-validation:hover {
+    background: var(--spotify-green);
+    color: #000;
+    border-color: var(--spotify-green);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+}
+
 .btn-sm {
     padding: 5px 10px;
     font-size: 0.72rem;
@@ -172,88 +136,17 @@ body {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     color: var(--text-secondary);
-    padding: 2px 8px;
-    font-size: 0.7rem;
+    padding: 3px 9px;
+    font-size: 0.72rem;
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .btn-tiny:hover {
     color: var(--spotify-green);
     border-color: var(--spotify-green);
-}
-
-/* ==========================================================================
-   Quick Samples Ribbon (Pill Scroll)
-   ========================================================================== */
-
-.samples-ribbon {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 8px 14px;
-    margin-bottom: 12px;
-}
-
-.ribbon-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--spotify-green);
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.samples-scroll {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.samples-scroll::-webkit-scrollbar {
-    display: none;
-}
-
-.sample-chip {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--bg-card-alt);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-full);
-    padding: 4px 10px;
-    font-size: 0.74rem;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s ease;
-}
-
-.sample-chip:hover {
-    border-color: var(--spotify-green);
-    background: var(--bg-elevated);
-}
-
-.sample-chip.active {
-    background: rgba(29, 185, 84, 0.15);
-    border-color: var(--spotify-green);
-    color: var(--spotify-green);
-}
-
-.chip-title {
-    font-weight: 700;
-}
-
-.chip-sep {
-    color: var(--text-muted);
-}
-
-.chip-artist {
-    color: var(--text-secondary);
 }
 
 /* ==========================================================================
@@ -263,18 +156,18 @@ body {
 .studio-layout {
     display: grid;
     grid-template-columns: 320px 1fr;
-    gap: 14px;
+    gap: 16px;
     align-items: start;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 992px) {
     .studio-layout {
         grid-template-columns: 1fr;
     }
 }
 
 /* ==========================================================================
-   Left Control Panel
+   Left Control Panel (3-Step Guided Flow)
    ========================================================================== */
 
 .control-panel {
@@ -297,12 +190,31 @@ body {
     align-items: center;
     padding: 10px 14px;
     border-bottom: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.015);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.card-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-badge {
+    background: rgba(56, 189, 248, 0.15);
+    color: var(--accent-blue);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
 .card-title {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
+    color: var(--text-primary);
 }
 
 .card-body {
@@ -315,7 +227,7 @@ body {
     color: var(--text-primary);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 7px 10px;
+    padding: 8px 10px;
     font-size: 0.78rem;
     font-family: inherit;
     outline: none;
@@ -347,7 +259,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.15rem;
+    flex-shrink: 0;
 }
 
 .seed-meta {
@@ -379,7 +292,7 @@ body {
     color: var(--spotify-green);
     font-size: 0.65rem;
     font-weight: 600;
-    padding: 1px 5px;
+    padding: 1px 6px;
     border-radius: 3px;
 }
 
@@ -395,6 +308,7 @@ body {
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
+    user-select: none;
 }
 
 .custom-tuning-details summary:hover {
@@ -440,12 +354,12 @@ body {
 .form-range::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: var(--spotify-green);
     cursor: pointer;
-    box-shadow: 0 0 5px rgba(29, 185, 84, 0.6);
+    box-shadow: 0 0 6px rgba(29, 185, 84, 0.6);
 }
 
 /* Segmented Algo Tabs */
@@ -465,15 +379,17 @@ body {
     color: var(--text-secondary);
     font-size: 0.74rem;
     font-weight: 600;
-    padding: 5px 2px;
+    padding: 6px 2px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .tab-btn.active {
     background: var(--spotify-green);
     color: #000;
+    font-weight: 700;
 }
 
 /* Pill Group */
@@ -494,6 +410,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    font-family: inherit;
 }
 
 .pill-btn:hover {
@@ -505,6 +422,7 @@ body {
     background: rgba(56, 189, 248, 0.15);
     border-color: var(--accent-blue);
     color: var(--accent-blue);
+    font-weight: 700;
 }
 
 .control-label-sm {
@@ -579,20 +497,6 @@ body {
     gap: 8px;
 }
 
-.brand-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.btn-icon, .chip-icon, .modal-icon, .canvas-icon, .banner-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-}
-
 /* ==========================================================================
    Right Main Viewport
    ========================================================================== */
@@ -603,7 +507,7 @@ body {
     gap: 12px;
 }
 
-/* KPI Bar (4 Cards) */
+/* Minimal KPI Stats (4 Cards) */
 .kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -620,7 +524,7 @@ body {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 8px 12px;
+    padding: 9px 13px;
     display: flex;
     flex-direction: column;
     box-shadow: var(--shadow-card);
@@ -628,15 +532,17 @@ body {
 
 .kpi-label {
     font-size: 0.68rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
 .kpi-value {
     font-family: 'JetBrains Mono', monospace;
     font-size: 1.25rem;
     font-weight: 800;
-    margin: 1px 0;
+    margin: 2px 0 1px 0;
 }
 
 .kpi-value.green { color: var(--spotify-green); }
@@ -646,7 +552,7 @@ body {
 
 .kpi-sub {
     font-size: 0.65rem;
-    color: var(--text-muted);
+    font-weight: 600;
 }
 
 /* ==========================================================================
@@ -702,21 +608,18 @@ body {
     display: inline-block;
 }
 
-.legend-dot.green { background-color: var(--spotify-green); }
-.legend-dot.blue { background-color: var(--accent-blue); }
-
 .canvas-wrapper {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 420px;
     background: #05080F;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 #audioSpaceCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     display: block;
@@ -740,7 +643,7 @@ body {
 .canvas-tooltip {
     position: absolute;
     display: none;
-    background: rgba(15, 23, 38, 0.95);
+    background: rgba(13, 20, 36, 0.95);
     backdrop-filter: blur(6px);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
@@ -837,7 +740,7 @@ body {
 
 .bar-row {
     display: grid;
-    grid-template-columns: 90px 1fr 35px;
+    grid-template-columns: 95px 1fr 35px;
     align-items: center;
     gap: 8px;
     font-size: 0.7rem;
@@ -889,6 +792,13 @@ body {
     color: var(--text-secondary);
 }
 
+.radar-legend .legend-dot {
+    margin-right: 2px;
+}
+
+.radar-legend .legend-dot.green { background-color: var(--spotify-green); }
+.radar-legend .legend-dot.blue { background-color: var(--accent-blue); }
+
 .radar-wrapper {
     display: flex;
     justify-content: center;
@@ -897,7 +807,7 @@ body {
 }
 
 /* ==========================================================================
-   Playlist-Style Recommendations Table (Clean & Spotify-like)
+   Playlist-Style Recommendations Table
    ========================================================================== */
 
 .recommendations-container {
@@ -924,6 +834,19 @@ body {
 .title-with-badge h3 {
     font-size: 0.88rem;
     font-weight: 700;
+}
+
+.badge-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+}
+
+.badge-tag.green {
+    background: rgba(29, 185, 84, 0.12);
+    color: var(--spotify-green);
+    border: 1px solid rgba(29, 185, 84, 0.3);
 }
 
 .rec-latency {
@@ -1039,6 +962,7 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;
+    font-family: inherit;
 }
 
 .playlist-row:hover .btn-play-seed {
@@ -1052,7 +976,7 @@ body {
 }
 
 /* ==========================================================================
-   Pedagogical Insight Callout (Clean)
+   Pedagogical Insight Callout
    ========================================================================== */
 
 .insight-box {
@@ -1067,10 +991,6 @@ body {
     align-items: center;
     gap: 6px;
     margin-bottom: 4px;
-}
-
-.insight-icon {
-    font-size: 1rem;
 }
 
 .insight-header h4 {
@@ -1095,7 +1015,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.78);
     backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
