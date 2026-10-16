@@ -1,8 +1,10 @@
 /**
- * Spotify Song Recommendation Studio - Client Controller
+ * Spotify Song Recommendation Studio - Client Controller & ML Engine
  * HK261 Intelligent Systems - Chapter 6 Application
  * Algorithms: K-Means, Agglomerative Hierarchical, DBSCAN
  * Visualizations: 2D Audio Feature Space (PCA), Radar Chart, Cluster Validation Curves
+ *
+ * Fully dual-mode: Real-time 0ms client-side execution + server API sync.
  */
 
 (function () {
@@ -21,6 +23,7 @@
         topN: 5,
         filterCluster: false,
         customFeatures: null,
+        tracks: [],
         points: [],
         centroids: [],
         metrics: {},
@@ -29,7 +32,8 @@
         radar: null,
         clusterColors: [
             "#1DB954", "#38BDF8", "#F43F5E", "#F59E0B",
-            "#A855F7", "#EC4899", "#06B6D4", "#10B981"
+            "#A855F7", "#EC4899", "#06B6D4", "#10B981",
+            "#F97316", "#6366F1"
         ],
         hoveredPoint: null,
         animFrameId: null,
@@ -136,9 +140,433 @@
     let silChartInstance = null;
     let debounceTimer = null;
 
+    // --- High-Performance Client Machine Learning Module ---
+
+    function euclideanDist(a, b) {
+        let s = 0;
+        for (let i = 0; i < a.length; i++) {
+            const d = a[i] - b[i];
+            s += d * d;
+        }
+        return Math.sqrt(s);
+    }
+
+    function cosineDist(a, b) {
+        let dot = 0, normA = 0, normB = 0;
+        for (let i = 0; i < a.length; i++) {
+            dot += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+        }
+        const denom = Math.sqrt(normA) * Math.sqrt(normB);
+        if (denom === 0) return 1.0;
+        const sim = Math.max(-1.0, Math.min(1.0, dot / denom));
+        return 1.0 - sim;
+    }
+
+    function manhattanDist(a, b) {
+        let s = 0;
+        for (let i = 0; i < a.length; i++) {
+            s += Math.abs(a[i] - b[i]);
+        }
+        return s;
+    }
+
+    function calcDistance(a, b, metric) {
+        if (metric === "cosine") return cosineDist(a, b);
+        if (metric === "manhattan") return manhattanDist(a, b);
+        return euclideanDist(a, b);
+    }
+
+    // Client K-Means Implementation
+    function runKMeansClient(tracks, k, initMethod) {
+        const N = tracks.length;
+        const D = tracks[0].feature_vector.length;
+        let centroids = [];
+
+        if (initMethod === "random") {
+            const indices = [];
+            while (indices.length < k) {
+                const idx = Math.floor(Math.random() * N);
+                if (!indices.includes(idx)) indices.push(idx);
+            }
+            centroids = indices.map(idx => [...tracks[idx].feature_vector]);
+        } else {
+            // Deterministic k-means++ for consistency
+            centroids.push([...tracks[0].feature_vector]);
+            while (centroids.length < k) {
+                const distsSq = [];
+                let sumSq = 0;
+                for (let i = 0; i < N; i++) {
+                    let minD = Infinity;
+                    for (let c = 0; c < centroids.length; c++) {
+                        const d = euclideanDist(tracks[i].feature_vector, centroids[c]);
+                        if (d < minD) minD = d;
+                    }
+                    const dSq = minD * minD;
+                    distsSq.push(dSq);
+                    sumSq += dSq;
+                }
+                let target = ((centroids.length * 37) % 100 / 100.0) * sumSq;
+                let chosen = 0;
+                for (let i = 0; i < N; i++) {
+                    target -= distsSq[i];
+                    if (target <= 0) {
+                        chosen = i;
+                        break;
+                    }
+                }
+                centroids.push([...tracks[chosen].feature_vector]);
+            }
+        }
+
+        let labels = new Array(N).fill(0);
+        const maxIter = 25;
+        for (let iter = 0; iter < maxIter; iter++) {
+            let changed = false;
+            for (let i = 0; i < N; i++) {
+                let minD = Infinity, bestC = 0;
+                for (let c = 0; c < k; c++) {
+                    const d = euclideanDist(tracks[i].feature_vector, centroids[c]);
+                    if (d < minD) {
+                        minD = d;
+                        bestC = c;
+                    }
+                }
+                if (labels[i] !== bestC) {
+                    labels[i] = bestC;
+                    changed = true;
+                }
+            }
+            if (!changed && iter > 0) break;
+
+            const counts = new Array(k).fill(0);
+            const newCentroids = Array.from({ length: k }, () => new Array(D).fill(0));
+            for (let i = 0; i < N; i++) {
+                const c = labels[i];
+                counts[c]++;
+                for (let d = 0; d < D; d++) {
+                    newCentroids[c][d] += tracks[i].feature_vector[d];
+                }
+            }
+            for (let c = 0; c < k; c++) {
+                if (counts[c] > 0) {
+                    for (let d = 0; d < D; d++) {
+                        centroids[c][d] = newCentroids[c][d] / counts[c];
+                    }
+                }
+            }
+        }
+
+        let sse = 0;
+        for (let i = 0; i < N; i++) {
+            const c = labels[i];
+            for (let d = 0; d < D; d++) {
+                const diff = tracks[i].feature_vector[d] - centroids[c][d];
+                sse += diff * diff;
+            }
+        }
+
+        const centroids2D = [];
+        for (let c = 0; c < k; c++) {
+            let sumX = 0, sumY = 0, count = 0;
+            for (let i = 0; i < N; i++) {
+                if (labels[i] === c) {
+                    sumX += tracks[i].pca_x;
+                    sumY += tracks[i].pca_y;
+                    count++;
+                }
+            }
+            if (count > 0) {
+                centroids2D.push([Number((sumX / count).toFixed(4)), Number((sumY / count).toFixed(4))]);
+            } else {
+                centroids2D.push([0, 0]);
+            }
+        }
+
+        return { labels, centroids2D, sse: Number(sse.toFixed(2)), nClusters: k, nNoise: 0 };
+    }
+
+    // Client Hierarchical Clustering
+    function runHierarchicalClient(tracks, k, linkage) {
+        const N = tracks.length;
+        const distMatrix = [];
+        for (let i = 0; i < N; i++) {
+            distMatrix[i] = [];
+            for (let j = 0; j < N; j++) {
+                distMatrix[i][j] = i === j ? 0 : euclideanDist(tracks[i].feature_vector, tracks[j].feature_vector);
+            }
+        }
+
+        let clusters = tracks.map((_, i) => [i]);
+
+        function clusterDist(c1, c2) {
+            if (linkage === "single") {
+                let minD = Infinity;
+                for (let i of c1) {
+                    for (let j of c2) {
+                        if (distMatrix[i][j] < minD) minD = distMatrix[i][j];
+                    }
+                }
+                return minD;
+            } else if (linkage === "complete") {
+                let maxD = -Infinity;
+                for (let i of c1) {
+                    for (let j of c2) {
+                        if (distMatrix[i][j] > maxD) maxD = distMatrix[i][j];
+                    }
+                }
+                return maxD;
+            } else {
+                let sumD = 0;
+                for (let i of c1) {
+                    for (let j of c2) {
+                        sumD += distMatrix[i][j];
+                    }
+                }
+                return sumD / (c1.length * c2.length);
+            }
+        }
+
+        while (clusters.length > k) {
+            let bestDist = Infinity, bestI = 0, bestJ = 1;
+            for (let i = 0; i < clusters.length; i++) {
+                for (let j = i + 1; j < clusters.length; j++) {
+                    const d = clusterDist(clusters[i], clusters[j]);
+                    if (d < bestDist) {
+                        bestDist = d;
+                        bestI = i;
+                        bestJ = j;
+                    }
+                }
+            }
+            const merged = clusters[bestI].concat(clusters[bestJ]);
+            clusters.splice(bestJ, 1);
+            clusters[bestI] = merged;
+        }
+
+        const labels = new Array(N).fill(0);
+        const centroids2D = [];
+        for (let c = 0; c < clusters.length; c++) {
+            let sumX = 0, sumY = 0;
+            for (let idx of clusters[c]) {
+                labels[idx] = c;
+                sumX += tracks[idx].pca_x;
+                sumY += tracks[idx].pca_y;
+            }
+            centroids2D.push([Number((sumX / clusters[c].length).toFixed(4)), Number((sumY / clusters[c].length).toFixed(4))]);
+        }
+
+        return { labels, centroids2D, sse: "N/A", nClusters: k, nNoise: 0 };
+    }
+
+    // Client DBSCAN Implementation
+    function runDBSCANClient(tracks, eps, minSamples) {
+        const N = tracks.length;
+        const labels = new Array(N).fill(-1);
+        const visited = new Array(N).fill(false);
+        let clusterIdx = 0;
+
+        function getNeighbors(i) {
+            const neighbors = [];
+            for (let j = 0; j < N; j++) {
+                if (euclideanDist(tracks[i].feature_vector, tracks[j].feature_vector) <= eps) {
+                    neighbors.push(j);
+                }
+            }
+            return neighbors;
+        }
+
+        for (let i = 0; i < N; i++) {
+            if (visited[i]) continue;
+            visited[i] = true;
+            const neighbors = getNeighbors(i);
+            if (neighbors.length >= minSamples) {
+                labels[i] = clusterIdx;
+                const queue = [...neighbors];
+                for (let q = 0; q < queue.length; q++) {
+                    const pt = queue[q];
+                    if (!visited[pt]) {
+                        visited[pt] = true;
+                        const ptNeighbors = getNeighbors(pt);
+                        if (ptNeighbors.length >= minSamples) {
+                            for (let n of ptNeighbors) {
+                                if (!queue.includes(n)) queue.push(n);
+                            }
+                        }
+                    }
+                    if (labels[pt] === -1) {
+                        labels[pt] = clusterIdx;
+                    }
+                }
+                clusterIdx++;
+            }
+        }
+
+        const centroids2D = [];
+        for (let c = 0; c < clusterIdx; c++) {
+            let sumX = 0, sumY = 0, count = 0;
+            for (let i = 0; i < N; i++) {
+                if (labels[i] === c) {
+                    sumX += tracks[i].pca_x;
+                    sumY += tracks[i].pca_y;
+                    count++;
+                }
+            }
+            if (count > 0) {
+                centroids2D.push([Number((sumX / count).toFixed(4)), Number((sumY / count).toFixed(4))]);
+            }
+        }
+
+        const nNoise = labels.filter(l => l === -1).length;
+        return { labels, centroids2D, sse: "N/A", nClusters: clusterIdx, nNoise };
+    }
+
+    // Client Silhouette Score Evaluation
+    function calcSilhouetteClient(tracks, labels) {
+        const N = tracks.length;
+        const validIndices = [];
+        const clusterMap = {};
+
+        for (let i = 0; i < N; i++) {
+            const c = labels[i];
+            if (c !== -1) {
+                validIndices.push(i);
+                if (!clusterMap[c]) clusterMap[c] = [];
+                clusterMap[c].push(i);
+            }
+        }
+
+        const uniqueClusters = Object.keys(clusterMap);
+        if (uniqueClusters.length < 2 || validIndices.length <= uniqueClusters.length) {
+            return "N/A";
+        }
+
+        let totalSil = 0;
+        for (let i of validIndices) {
+            const myCluster = labels[i];
+            const sameClusterPts = clusterMap[myCluster];
+            let a = 0;
+            if (sameClusterPts.length > 1) {
+                let sumA = 0;
+                for (let j of sameClusterPts) {
+                    if (i !== j) sumA += euclideanDist(tracks[i].feature_vector, tracks[j].feature_vector);
+                }
+                a = sumA / (sameClusterPts.length - 1);
+            }
+
+            let b = Infinity;
+            for (let c of uniqueClusters) {
+                const cId = parseInt(c);
+                if (cId === myCluster) continue;
+                const otherPts = clusterMap[cId];
+                let sumB = 0;
+                for (let j of otherPts) {
+                    sumB += euclideanDist(tracks[i].feature_vector, tracks[j].feature_vector);
+                }
+                const meanB = sumB / otherPts.length;
+                if (meanB < b) b = meanB;
+            }
+
+            const denom = Math.max(a, b);
+            const s = denom === 0 ? 0 : (b - a) / denom;
+            totalSil += s;
+        }
+
+        return Number((totalSil / validIndices.length).toFixed(4));
+    }
+
+    // Client Recommendation Generation
+    function generateRecommendationsClient(seedSong, tracks, labels, metric, topN, filterCluster) {
+        const seedVec = seedSong.feature_vector;
+        const seedCluster = seedSong.id === "custom" ? -1 : labels[tracks.findIndex(t => t.id === seedSong.id)];
+
+        const scored = [];
+        let maxDist = 0.0001;
+
+        for (let i = 0; i < tracks.length; i++) {
+            const t = tracks[i];
+            if (t.id === seedSong.id) continue;
+            const cId = labels[i];
+            if (filterCluster && seedCluster !== -1 && cId !== seedCluster) continue;
+
+            const d = calcDistance(seedVec, t.feature_vector, metric);
+            if (d > maxDist) maxDist = d;
+            scored.push({ track: t, dist: d, cluster: cId });
+        }
+
+        if (scored.length === 0) {
+            for (let i = 0; i < tracks.length; i++) {
+                const t = tracks[i];
+                if (t.id === seedSong.id) continue;
+                const d = calcDistance(seedVec, t.feature_vector, metric);
+                scored.push({ track: t, dist: d, cluster: labels[i] });
+            }
+        }
+
+        scored.sort((a, b) => a.dist - b.dist);
+        const topCandidates = scored.slice(0, topN);
+
+        const recs = topCandidates.map((item, idx) => {
+            const t = item.track;
+            let matchPct = 0;
+            if (metric === "cosine") {
+                matchPct = Math.max(0, Math.min(100, Math.round((1.0 - item.dist / 2.0) * 1000) / 10));
+            } else {
+                matchPct = Math.max(0, Math.min(100, Math.round((1.0 - item.dist / (maxDist + 1e-5)) * 1000) / 10));
+            }
+
+            const reason = (item.cluster === seedCluster && seedCluster !== -1)
+                ? `Same cluster #${item.cluster + 1} • ${t.genre} • ${Math.round(t.tempo)} BPM`
+                : `Acoustic similarity • ${t.genre} • ${Math.round(t.tempo)} BPM`;
+
+            return {
+                rank: idx + 1,
+                id: t.id,
+                title: t.title,
+                artist: t.artist,
+                genre: t.genre,
+                year: t.year,
+                tempo: t.tempo,
+                danceability: t.danceability,
+                energy: t.energy,
+                valence: t.valence,
+                acousticness: t.acousticness,
+                instrumentalness: t.instrumentalness,
+                speechiness: t.speechiness,
+                cluster: item.cluster,
+                distance: Number(item.dist.toFixed(4)),
+                match_percentage: matchPct,
+                pca_x: t.pca_x,
+                pca_y: t.pca_y,
+                reason: reason
+            };
+        });
+
+        const topRec = recs[0] || seedSong;
+        const radar = {
+            labels: ["Danceability", "Energy", "Valence", "Acousticness", "Instrumentalness", "Speechiness"],
+            seed_title: seedSong.title,
+            seed_artist: seedSong.artist,
+            seed_values: [
+                seedSong.danceability, seedSong.energy, seedSong.valence,
+                seedSong.acousticness, seedSong.instrumentalness, seedSong.speechiness
+            ],
+            rec_title: topRec.title,
+            rec_artist: topRec.artist,
+            rec_values: [
+                topRec.danceability, topRec.energy, topRec.valence,
+                topRec.acousticness, topRec.instrumentalness, topRec.speechiness
+            ]
+        };
+
+        return { recommendations: recs, radar };
+    }
+
     // Initialize with Pre-computed Server Data
     function init() {
         if (window.INITIAL_DATA) {
+            state.tracks = window.INITIAL_DATA.tracks || [];
             state.points = window.INITIAL_DATA.points || [];
             state.centroids = window.INITIAL_DATA.centroids || [];
             state.metrics = window.INITIAL_DATA.metrics || {};
@@ -152,6 +580,31 @@
             if (state.seedSong) {
                 state.seedId = state.seedSong.id;
             }
+        }
+
+        // If tracks was not explicitly loaded, build it from points
+        if (state.tracks.length === 0 && state.points.length > 0) {
+            state.tracks = state.points.map(p => ({
+                id: p.id,
+                title: p.title,
+                artist: p.artist,
+                genre: p.genre,
+                year: p.year,
+                tempo: p.tempo,
+                danceability: p.danceability,
+                energy: p.energy,
+                valence: p.valence || 0.5,
+                acousticness: p.acousticness || 0.2,
+                instrumentalness: p.instrumentalness || 0.0,
+                speechiness: p.speechiness || 0.05,
+                pca_x: p.x,
+                pca_y: p.y,
+                feature_vector: p.feature_vector || [
+                    p.danceability, p.energy, p.valence || 0.5,
+                    (p.tempo - 120) / 30, p.acousticness || 0.2,
+                    p.instrumentalness || 0.0, p.speechiness || 0.05, -6.0
+                ]
+            }));
         }
 
         setupEventListeners();
@@ -534,7 +987,6 @@
             ctx.lineTo(x, y);
             ctx.stroke();
 
-            // Label position with offset
             const labelX = centerX + Math.cos(angle) * (radius + 18);
             const labelY = centerY + Math.sin(angle) * (radius + 18);
             ctx.fillText(radarData.labels[i], labelX, labelY);
@@ -624,7 +1076,7 @@
         if (elements.valSeedAcoustic) elements.valSeedAcoustic.textContent = seed.acousticness;
     }
 
-    // Update UI Elements with Latest Server Response State
+    // Update UI Elements with State
     function updateUI(data) {
         if (data.metrics) {
             state.metrics = data.metrics;
@@ -712,8 +1164,90 @@
         renderRadarChart();
     }
 
-    // Trigger Server API for Clustering & Recommendations
+    // Trigger Clustering & Recommendations (Instant Client Execution + Server Sync)
     function triggerClusterUpdate() {
+        const t0 = performance.now();
+
+        // Ensure we have active tracks
+        if (state.tracks.length > 0) {
+            let clusterResult;
+            let explanation = "";
+
+            if (state.algorithm === "kmeans") {
+                clusterResult = runKMeansClient(state.tracks, state.k, state.init);
+                explanation = `🎯 K-Means: Partitioned ${state.tracks.length} tracks into K=${state.k} acoustic clusters (SSE = ${clusterResult.sse}). '${state.init}' initialization provides well-distributed centroids.`;
+            } else if (state.algorithm === "hierarchical") {
+                clusterResult = runHierarchicalClient(state.tracks, state.k, state.linkage);
+                explanation = `🌿 Hierarchical: Built agglomerative tree (${state.linkage} linkage) with ${state.k} clusters capturing musical genre proximity.`;
+            } else if (state.algorithm === "dbscan") {
+                clusterResult = runDBSCANClient(state.tracks, state.eps, state.minSamples);
+                explanation = `⁘ DBSCAN: Discovered ${clusterResult.nClusters} natural density clusters (ε=${state.eps.toFixed(2)}, MinPts=${state.minSamples}) with ${clusterResult.nNoise} noise outliers.`;
+            }
+
+            const silScore = calcSilhouetteClient(state.tracks, clusterResult.labels);
+
+            // Update points payload
+            const pointsPayload = state.tracks.map((t, i) => {
+                const cId = clusterResult.labels[i];
+                const color = cId === -1 ? "#64748B" : state.clusterColors[cId % state.clusterColors.length];
+                const pType = cId === -1 ? "noise" : "normal";
+                return {
+                    id: t.id,
+                    title: t.title,
+                    artist: t.artist,
+                    genre: t.genre,
+                    year: t.year,
+                    tempo: t.tempo,
+                    danceability: t.danceability,
+                    energy: t.energy,
+                    valence: t.valence,
+                    acousticness: t.acousticness,
+                    instrumentalness: t.instrumentalness,
+                    speechiness: t.speechiness,
+                    x: t.pca_x,
+                    y: t.pca_y,
+                    cluster: cId,
+                    type: pType,
+                    color: color
+                };
+            });
+
+            // Active seed song
+            const activeSeed = state.seedSong || state.tracks[0];
+
+            // Recommendations
+            const { recommendations, radar } = generateRecommendationsClient(
+                activeSeed,
+                state.tracks,
+                clusterResult.labels,
+                state.metric,
+                state.topN,
+                state.filterCluster
+            );
+
+            const elapsedMs = Math.round((performance.now() - t0) * 10) / 10;
+
+            const clientMetrics = {
+                n_clusters: clusterResult.nClusters || state.k,
+                n_noise: clusterResult.nNoise || 0,
+                silhouette: silScore,
+                inertia: clusterResult.sse,
+                inference_time_ms: elapsedMs
+            };
+
+            // Instant UI update
+            updateUI({
+                metrics: clientMetrics,
+                points: pointsPayload,
+                centroids: clusterResult.centroids2D,
+                seed_song: activeSeed,
+                recommendations: recommendations,
+                radar: radar,
+                explanation: explanation
+            });
+        }
+
+        // Asynchronous Background Server Sync (if backend is active)
         const payload = {
             algorithm: state.algorithm,
             k: state.k,
@@ -733,15 +1267,19 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         })
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error("Server status " + res.status);
+            return res.json();
+        })
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 updateUI(data);
-            } else {
-                console.error("Cluster API error:", data.error);
             }
         })
-        .catch(err => console.error("Cluster API network error:", err));
+        .catch(err => {
+            // Client ML engine already handled the update smoothly
+            console.debug("Backend API offline; running client ML engine:", err.message);
+        });
     }
 
     // Select a New Seed Song with Instant Reactive Visual Feedback
@@ -749,8 +1287,7 @@
         state.seedId = songId;
         state.customFeatures = null;
 
-        // Immediate local lookup for instantaneous visual update on the graph!
-        const found = state.points.find(p => p.id === songId);
+        const found = state.tracks.find(t => t.id === songId) || state.points.find(p => p.id === songId);
         if (found) {
             state.seedSong = {
                 id: found.id,
@@ -763,8 +1300,15 @@
                 energy: found.energy,
                 valence: found.valence || 0.5,
                 acousticness: found.acousticness || 0.2,
-                pca_x: found.x,
-                pca_y: found.y
+                instrumentalness: found.instrumentalness || 0.0,
+                speechiness: found.speechiness || 0.05,
+                feature_vector: found.feature_vector || [
+                    found.danceability, found.energy, found.valence || 0.5,
+                    (found.tempo - 120) / 30, found.acousticness || 0.2,
+                    found.instrumentalness || 0.0, found.speechiness || 0.05, -6.0
+                ],
+                pca_x: found.x !== undefined ? found.x : found.pca_x,
+                pca_y: found.y !== undefined ? found.y : found.pca_y
             };
             if (elements.songSelect && elements.songSelect.value !== songId) {
                 elements.songSelect.value = songId;
@@ -817,7 +1361,7 @@
             elements.kSlider.addEventListener("input", (e) => {
                 state.k = parseInt(e.target.value);
                 if (elements.kVal) elements.kVal.textContent = state.k;
-                debounce(triggerClusterUpdate, 200);
+                triggerClusterUpdate();
             });
         }
 
@@ -835,7 +1379,7 @@
             elements.hierKSlider.addEventListener("input", (e) => {
                 state.k = parseInt(e.target.value);
                 if (elements.hierKVal) elements.hierKVal.textContent = state.k;
-                debounce(triggerClusterUpdate, 200);
+                triggerClusterUpdate();
             });
         }
 
@@ -851,7 +1395,7 @@
             elements.epsSlider.addEventListener("input", (e) => {
                 state.eps = parseFloat(e.target.value);
                 if (elements.epsVal) elements.epsVal.textContent = state.eps.toFixed(2);
-                debounce(triggerClusterUpdate, 250);
+                debounce(triggerClusterUpdate, 100);
             });
         }
 
@@ -859,7 +1403,7 @@
             elements.minPtsSlider.addEventListener("input", (e) => {
                 state.minSamples = parseInt(e.target.value);
                 if (elements.minPtsVal) elements.minPtsVal.textContent = state.minSamples;
-                debounce(triggerClusterUpdate, 250);
+                debounce(triggerClusterUpdate, 100);
             });
         }
 
@@ -884,7 +1428,7 @@
             elements.topNSlider.addEventListener("input", (e) => {
                 state.topN = parseInt(e.target.value);
                 if (elements.topNVal) elements.topNVal.textContent = state.topN;
-                debounce(triggerClusterUpdate, 200);
+                triggerClusterUpdate();
             });
         }
 
@@ -904,16 +1448,46 @@
 
         if (elements.applyCustomBtn) {
             elements.applyCustomBtn.addEventListener("click", () => {
-                state.customFeatures = [
-                    parseFloat(elements.sliderDance.value),
-                    parseFloat(elements.sliderEnergy.value),
-                    parseFloat(elements.sliderValence.value),
-                    parseFloat(elements.sliderTempo.value),
-                    parseFloat(elements.sliderAcoustic.value),
-                    0.0,   // instrumentalness
-                    0.06,  // speechiness
-                    -6.0   // loudness
-                ];
+                const dance = parseFloat(elements.sliderDance.value);
+                const energy = parseFloat(elements.sliderEnergy.value);
+                const valence = parseFloat(elements.sliderValence.value);
+                const tempo = parseFloat(elements.sliderTempo.value);
+                const acoustic = parseFloat(elements.sliderAcoustic.value);
+
+                state.customFeatures = [dance, energy, valence, tempo, acoustic, 0.0, 0.06, -6.0];
+
+                // Approximate 2D PCA projection for custom tuned vector
+                const customPcaX = Number(((dance - 0.6) * 1.8 + (tempo - 120) * 0.02 - (acoustic - 0.3) * 2.2).toFixed(4));
+                const customPcaY = Number(((energy - 0.6) * 2.5 - (valence - 0.5) * 1.5).toFixed(4));
+
+                state.seedSong = {
+                    id: "custom",
+                    title: "Custom Tuned Track",
+                    artist: "User Profile",
+                    genre: "Custom Audio",
+                    year: 2026,
+                    danceability: dance,
+                    energy: energy,
+                    valence: valence,
+                    tempo: tempo,
+                    acousticness: acoustic,
+                    instrumentalness: 0.0,
+                    speechiness: 0.06,
+                    pca_x: customPcaX,
+                    pca_y: customPcaY,
+                    feature_vector: [
+                        (dance - 0.65) / 0.15,
+                        (energy - 0.65) / 0.18,
+                        (valence - 0.5) / 0.22,
+                        (tempo - 120) / 28,
+                        (acoustic - 0.25) / 0.3,
+                        -0.3,
+                        0.0,
+                        0.2
+                    ]
+                };
+
+                updateSeedBanner(state.seedSong);
                 triggerClusterUpdate();
             });
         }
@@ -1017,9 +1591,42 @@
         }
 
         if (elements.modalBestKText) {
-            elements.modalBestKText.textContent = "Running K-Means evaluation across K in [2, 8]...";
+            elements.modalBestKText.textContent = "Calculating validation curves across K in [2, 8]...";
         }
 
+        // Compute immediately on client
+        if (state.tracks.length > 0) {
+            const kValues = [2, 3, 4, 5, 6, 7, 8];
+            const elbowCurve = [];
+            const silCurve = [];
+
+            kValues.forEach(k => {
+                const res = runKMeansClient(state.tracks, k, "k-means++");
+                elbowCurve.push(res.sse);
+                const s = calcSilhouetteClient(state.tracks, res.labels);
+                silCurve.push(typeof s === "number" ? s : 0);
+            });
+
+            let bestK = 2;
+            let bestSil = -1;
+            kValues.forEach((k, idx) => {
+                if (silCurve[idx] > bestSil) {
+                    bestSil = silCurve[idx];
+                    bestK = k;
+                }
+            });
+
+            state.validationCurves = {
+                k_values: kValues,
+                elbow_curve: elbowCurve,
+                silhouette_curve: silCurve,
+                best_k: bestK
+            };
+
+            renderValidationCharts(state.validationCurves);
+        }
+
+        // Sync with backend if available
         fetch("/api/validation-curve", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1027,12 +1634,12 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.success) {
+            if (data && data.success) {
                 state.validationCurves = data;
                 renderValidationCharts(data);
             }
         })
-        .catch(err => console.error("Validation Curve error:", err));
+        .catch(err => console.debug("Validation curve client computed:", err));
     }
 
     function renderValidationCharts(data) {
@@ -1045,7 +1652,7 @@
         }
 
         // 1. Elbow Chart (Chart.js)
-        if (elements.elbowChartCanvas) {
+        if (elements.elbowChartCanvas && window.Chart) {
             if (elbowChartInstance) elbowChartInstance.destroy();
             const ctxElbow = elements.elbowChartCanvas.getContext("2d");
             elbowChartInstance = new Chart(ctxElbow, {
@@ -1079,7 +1686,7 @@
         }
 
         // 2. Silhouette Chart (Chart.js)
-        if (elements.silhouetteChartCanvas) {
+        if (elements.silhouetteChartCanvas && window.Chart) {
             if (silChartInstance) silChartInstance.destroy();
             const ctxSil = elements.silhouetteChartCanvas.getContext("2d");
             silChartInstance = new Chart(ctxSil, {
